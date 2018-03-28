@@ -333,4 +333,16 @@ export class LazyQueryConcat<T> implements ILazyQuery<T> {
 	prepend<U>(iterable: Iterable<U>): ILazyQuery<T | U> {
 		return new LazyQueryPrepend(this, iterable);
 	}
+
+	find(predicate: Predicate<T>): T | undefined {
+		const iterator = this[Symbol.iterator]();
+		let value = iterator.next();
+		while (!value.done) {
+			if (predicate(value.value)) {
+				return value.value;
+			}
+			value = iterator.next();
+		}
+		return undefined;
+	}
 }

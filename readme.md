@@ -230,3 +230,9 @@ Prepends a collection to the start of the collection
 ```sh
 L([1]).prepend([2, 3]).toArray() -> [2, 3, 1]
 ```
+
+#### find(predicate)
+Finds the first element that satisfies given predicate
+```sh
+L([1, 2, 3]).find(v => v % 2 === 0) -> 2
+```

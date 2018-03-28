@@ -333,4 +333,16 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 	prepend<V>(iterable: Iterable<V>): ILazyQuery<T | U | V> {
 		return new LazyQueryPrepend(this, iterable);
 	}
+
+	find(predicate: Predicate<T | U>): T | U | undefined {
+		const iterator = this[Symbol.iterator]();
+		let value = iterator.next();
+		while (!value.done) {
+			if (predicate(value.value)) {
+				return value.value;
+			}
+			value = iterator.next();
+		}
+		return undefined;
+	}
 }

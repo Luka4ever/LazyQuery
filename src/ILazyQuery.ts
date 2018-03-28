@@ -301,4 +301,13 @@ export interface ILazyQuery<T> extends IterableMemoizable<T> {
 	 * @memberof ILazyQuery
 	 */
 	prepend<U>(iterable: Iterable<U>): ILazyQuery<T | U>;
+
+	/**
+	 * Finds the first element that satisfies given predicate
+	 *
+	 * @param {Predicate<T>} predicate The predicate to test against
+	 * @returns {(T | undefined)} The first element that satisfies the predicate or undefined if no elements satisfy it
+	 * @memberof ILazyQuery
+	 */
+	find(predicate: Predicate<T>): T | undefined;
 }

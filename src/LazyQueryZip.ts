@@ -333,4 +333,16 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 	prepend<V>(iterable: Iterable<V>): ILazyQuery<Tuple<T, U> | V> {
 		return new LazyQueryPrepend(this, iterable);
 	}
+
+	find(predicate: Predicate<Tuple<T, U>>): Tuple<T, U> | undefined {
+		const iterator = this[Symbol.iterator]();
+		let value = iterator.next();
+		while (!value.done) {
+			if (predicate(value.value)) {
+				return value.value;
+			}
+			value = iterator.next();
+		}
+		return undefined;
+	}
 }

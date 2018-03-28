@@ -330,4 +330,16 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 	prepend<V>(iterable: Iterable<V>): ILazyQuery<U | V> {
 		return new LazyQueryPrepend(this, iterable);
 	}
+
+	find(predicate: Predicate<U>): U | undefined {
+		const iterator = this[Symbol.iterator]();
+		let value = iterator.next();
+		while (!value.done) {
+			if (predicate(value.value)) {
+				return value.value;
+			}
+			value = iterator.next();
+		}
+		return undefined;
+	}
 }

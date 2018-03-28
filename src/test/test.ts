@@ -288,3 +288,10 @@ test('prepend', t => {
 	t.deepEqual(L([1, 2]).prepend([3, 4]).toArray(), [3, 4, 1, 2]);
 	t.end();
 });
+
+test('find', t => {
+	t.deepEqual(L([]).find(even), undefined);
+	t.deepEqual(L([1, 2]).find(even), 2);
+	t.deepEqual(L([1, 3]).find(even), undefined);
+	t.end();
+});
