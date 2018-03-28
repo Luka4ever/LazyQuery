@@ -568,7 +568,7 @@ export class LazyQueryAppend<T, U> extends LazyQuery<T | U> {
 	}
 
 	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T | U> {
-		let iterator = this.source[Symbol.iterator](onlyMemoized);
+		let iterator: Iterator<T | U> = this.source[Symbol.iterator](onlyMemoized);
 		let value = iterator.next();
 		while (!value.done) {
 			yield value.value;
