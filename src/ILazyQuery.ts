@@ -319,4 +319,22 @@ export interface ILazyQuery<T> extends IterableMemoizable<T> {
 	 * @memberof ILazyQuery
 	 */
 	find(predicate: Predicate<T>): T | undefined;
+
+	/**
+	 * Calculates the average of a sequence of numbers
+	 *
+	 * @param {Transform<T, number>} [transform] A function to transform the elements of the collection to numerical representations
+	 * @returns {number} The average of the collection
+	 * @memberof ILazyQuery
+	 */
+	average(transform: Transform<T, number>): number;
+
+	/**
+	 * Calculates the average of a sequence of numbers
+	 *
+	 * @param {ILazyQuery<number>} this
+	 * @returns {number} The average of the collection
+	 * @memberof ILazyQuery
+	 */
+	average(this: ILazyQuery<number>): number;
 }

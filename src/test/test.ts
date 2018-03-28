@@ -296,3 +296,10 @@ test('find', t => {
 	t.deepEqual(L([1, 3]).find(even), undefined);
 	t.end();
 });
+
+test('average', t => {
+	t.deepEqual(L([1, 2, 6]).average(), 3);
+	t.deepEqual(L(<number[]>[]).average(), 0);
+	t.deepEqual(L('abc').average(char => char.charCodeAt(0)), 'b'.charCodeAt(0));
+	t.end();
+});

@@ -368,4 +368,25 @@ export class LazyQueryPermutations<T> implements ILazyQuery<T[]> {
 		}
 		return undefined;
 	}
+
+	average(transform?: Transform<T[], number>): number {
+		let total = 0;
+		let count = 0;
+		const iterator = this[Symbol.iterator]();
+		let value = iterator.next();
+		if (transform) {
+			while (!value.done) {
+				count++;
+				total += transform(value.value);
+				value = iterator.next();
+			}
+		} else {
+			while (!value.done) {
+				count++;
+				total += value.value as any as number;
+				value = iterator.next();
+			}
+		}
+		return count > 0 ? total / count : 0;
+	}
 }
