@@ -218,3 +218,9 @@ Returns a new infinite collection of repeated applications of the supplied funct
 ```sh
 L([1]).iterate(v => v + 1).take(4).toArray() -> [1, 2, 3, 4]
 ```
+
+#### append(collection)
+Appends a collection to the end of the collection
+```sh
+L([1]).append([2, 3]).toArray() -> [1, 2, 3]
+```

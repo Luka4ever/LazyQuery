@@ -1,6 +1,7 @@
 import { ILazyQuery } from './ILazyQuery';
 import {
 	LazyQuery,
+	LazyQueryAppend,
 	LazyQueryCycle,
 	LazyQueryDrop,
 	LazyQueryDropWhile,
@@ -322,5 +323,9 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 
 	iterate(func: (value: Tuple<T, U>) => Tuple<T, U>): ILazyQuery<Tuple<T, U>> {
 		return new LazyQueryIterate(this, func);
+	}
+
+	append<V>(iterable: Iterable<V>): ILazyQuery<Tuple<T, U> | V> {
+		return new LazyQueryAppend(this, iterable);
 	}
 }

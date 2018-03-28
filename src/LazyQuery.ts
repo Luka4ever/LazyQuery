@@ -307,6 +307,10 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 	iterate(func: (value: T) => T): ILazyQuery<T> {
 		return new LazyQueryIterate(this, func);
 	}
+
+	append<U>(iterable: Iterable<U>): ILazyQuery<T | U> {
+		return new LazyQueryAppend(this, iterable);
+	}
 }
 
 export class LazyQueryCycle<T> extends LazyQuery<T> {
@@ -554,6 +558,27 @@ export class LazyQueryUnique<T> extends LazyQuery<T> {
 				}
 				value = iterator.next();
 			}
+		}
+	}
+}
+
+export class LazyQueryAppend<T, U> extends LazyQuery<T | U> {
+	constructor(source: IterableMemoizable<T>, protected appendix: IterableMemoizable<U>) {
+		super(source);
+	}
+
+	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T | U> {
+		let iterator = this.source[Symbol.iterator](onlyMemoized);
+		let value = iterator.next();
+		while (!value.done) {
+			yield value.value;
+			value = iterator.next();
+		}
+		iterator = this.appendix[Symbol.iterator](onlyMemoized);
+		value = iterator.next();
+		while (!value.done) {
+			yield value.value;
+			value = iterator.next();
 		}
 	}
 }

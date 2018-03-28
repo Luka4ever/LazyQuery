@@ -281,4 +281,14 @@ export interface ILazyQuery<T> extends IterableMemoizable<T> {
 	 * @return {ILazyQuery<T>} A new collection
 	 */
 	iterate(func: (value: T) => T): ILazyQuery<T>;
+
+	/**
+	 * Appends a collection to the end of the collection
+	 *
+	 * @template U The type of the elements in the collection to append
+	 * @param {Iterable<U>} iterable The collection to append
+	 * @returns {(ILazyQuery<T | U>)} A new collection
+	 * @memberof ILazyQuery
+	 */
+	append<U>(iterable: Iterable<U>): ILazyQuery<T | U>;
 }

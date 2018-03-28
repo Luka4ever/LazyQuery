@@ -1,6 +1,7 @@
 import { ILazyQuery } from './ILazyQuery';
 import {
 	LazyQuery,
+	LazyQueryAppend,
 	LazyQueryCycle,
 	LazyQueryDrop,
 	LazyQueryDropWhile,
@@ -321,5 +322,9 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 
 	iterate(func: (value: U) => U): ILazyQuery<U> {
 		return new LazyQueryIterate(this, func);
+	}
+
+	append<V>(iterable: Iterable<V>): ILazyQuery<U | V> {
+		return new LazyQueryAppend(this, iterable);
 	}
 }
