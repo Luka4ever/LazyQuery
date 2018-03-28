@@ -291,4 +291,14 @@ export interface ILazyQuery<T> extends IterableMemoizable<T> {
 	 * @memberof ILazyQuery
 	 */
 	append<U>(iterable: Iterable<U>): ILazyQuery<T | U>;
+
+	/**
+	 * Prepends a collection to the start of the collection
+	 *
+	 * @template U The type of the elements in the collection to prepend
+	 * @param {Iterable<U>} iterable The collection to prepend
+	 * @returns {(ILazyQuery<T | U>)} A new collection
+	 * @memberof ILazyQuery
+	 */
+	prepend<U>(iterable: Iterable<U>): ILazyQuery<T | U>;
 }
