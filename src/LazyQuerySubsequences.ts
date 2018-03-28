@@ -8,6 +8,7 @@ import {
 	LazyQueryIterate,
 	LazyQueryMemoize,
 	LazyQueryOnlyMemoized,
+	LazyQueryPrepend,
 	LazyQueryTake,
 	LazyQueryTakeWhile,
 	LazyQueryTranspose,
@@ -349,5 +350,9 @@ export class LazyQuerySubsequences<T> implements ILazyQuery<T[]> {
 
 	append<U>(iterable: Iterable<U>): ILazyQuery<T[] | U> {
 		return new LazyQueryAppend(this, iterable);
+	}
+
+	prepend<U>(iterable: Iterable<U>): ILazyQuery<T[] | U> {
+		return new LazyQueryPrepend(this, iterable);
 	}
 }

@@ -311,6 +311,10 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 	append<U>(iterable: Iterable<U>): ILazyQuery<T | U> {
 		return new LazyQueryAppend(this, iterable);
 	}
+
+	prepend<U>(iterable: Iterable<U>): ILazyQuery<T | U> {
+		return new LazyQueryPrepend(this, iterable);
+	}
 }
 
 export class LazyQueryCycle<T> extends LazyQuery<T> {
@@ -575,6 +579,27 @@ export class LazyQueryAppend<T, U> extends LazyQuery<T | U> {
 			value = iterator.next();
 		}
 		iterator = this.appendix[Symbol.iterator](onlyMemoized);
+		value = iterator.next();
+		while (!value.done) {
+			yield value.value;
+			value = iterator.next();
+		}
+	}
+}
+
+export class LazyQueryPrepend<T, U> extends LazyQuery<T | U> {
+	constructor(source: IterableMemoizable<T>, protected appendix: IterableMemoizable<U>) {
+		super(source);
+	}
+
+	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T | U> {
+		let iterator: Iterator<T | U> = this.appendix[Symbol.iterator](onlyMemoized);
+		let value = iterator.next();
+		while (!value.done) {
+			yield value.value;
+			value = iterator.next();
+		}
+		iterator = this.source[Symbol.iterator](onlyMemoized);
 		value = iterator.next();
 		while (!value.done) {
 			yield value.value;

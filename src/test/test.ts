@@ -278,3 +278,13 @@ test('append', t => {
 	t.deepEqual(L([1, 2]).append([3, 4]).toArray(), [1, 2, 3, 4]);
 	t.end();
 });
+
+test('prepend', t => {
+	t.deepEqual(L([]).prepend([]).toArray(), []);
+	t.deepEqual(L([1]).prepend([]).toArray(), [1]);
+	t.deepEqual(L([]).prepend([2]).toArray(), [2]);
+	t.deepEqual(L([1]).prepend([2, 3]).toArray(), [2, 3, 1]);
+	t.deepEqual(L([1, 2]).prepend([3]).toArray(), [3, 1, 2]);
+	t.deepEqual(L([1, 2]).prepend([3, 4]).toArray(), [3, 4, 1, 2]);
+	t.end();
+});

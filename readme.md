@@ -224,3 +224,9 @@ Appends a collection to the end of the collection
 ```sh
 L([1]).append([2, 3]).toArray() -> [1, 2, 3]
 ```
+
+#### prepend(collection)
+Prepends a collection to the start of the collection
+```sh
+L([1]).prepend([2, 3]).toArray() -> [2, 3, 1]
+```

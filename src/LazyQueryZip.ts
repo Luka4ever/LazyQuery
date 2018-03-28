@@ -8,6 +8,7 @@ import {
 	LazyQueryIterate,
 	LazyQueryMemoize,
 	LazyQueryOnlyMemoized,
+	LazyQueryPrepend,
 	LazyQueryTake,
 	LazyQueryTakeWhile,
 	LazyQueryTranspose,
@@ -327,5 +328,9 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 
 	append<V>(iterable: Iterable<V>): ILazyQuery<Tuple<T, U> | V> {
 		return new LazyQueryAppend(this, iterable);
+	}
+
+	prepend<V>(iterable: Iterable<V>): ILazyQuery<Tuple<T, U> | V> {
+		return new LazyQueryPrepend(this, iterable);
 	}
 }

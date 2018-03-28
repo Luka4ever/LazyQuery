@@ -8,6 +8,7 @@ import {
 	LazyQueryIterate,
 	LazyQueryMemoize,
 	LazyQueryOnlyMemoized,
+	LazyQueryPrepend,
 	LazyQueryTake,
 	LazyQueryTakeWhile,
 	LazyQueryTranspose,
@@ -326,5 +327,9 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 
 	append<V>(iterable: Iterable<V>): ILazyQuery<U | V> {
 		return new LazyQueryAppend(this, iterable);
+	}
+
+	prepend<V>(iterable: Iterable<V>): ILazyQuery<U | V> {
+		return new LazyQueryPrepend(this, iterable);
 	}
 }
