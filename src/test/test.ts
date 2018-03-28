@@ -5,14 +5,14 @@ import { L } from '..';
 
 const range = (start?: number, step?: number, end?: number) => {
 	start = start || 0;
-	step = step === 0 ? 0 : step || 1;
-	const query = L([start]).iterate(v => v + step);
+	let stepValue = step === 0 ? 0 : step || 1;
+	const query = L([start]).iterate(v => v + stepValue);
 	return end === undefined ? query : query.takeWhile(v => v < end);
 };
-const even = v => v % 2 === 0;
-const odd = v => v % 2 !== 0;
-const mul2 = v => v * 2;
-const add = (a, b) => a + b;
+const even = (v: number) => v % 2 === 0;
+const odd = (v: number) => v % 2 !== 0;
+const mul2 = (v: number) => v * 2;
+const add = (a: number, b: number) => a + b;
 
 test('toArray', t => {
 	t.deepEqual(L([]).toArray(), []);
@@ -44,14 +44,14 @@ test('drop', t => {
 });
 
 test('takeWhile', t => {
-	t.deepEqual(L([]).takeWhile(v=>true).toArray(), []);
+	t.deepEqual(L([]).takeWhile(()=>true).toArray(), []);
 	t.deepEqual(L([1, 3, 0, 2]).takeWhile(v=>v>0).toArray(), [1, 3]);
 	t.end();
 });
 
 test('dropWhile', t => {
-	t.deepEqual(L([]).dropWhile(v=>true).toArray(), []);
-	t.deepEqual(L([1, 3]).dropWhile(v=>true).toArray(), []);
+	t.deepEqual(L([]).dropWhile(()=>true).toArray(), []);
+	t.deepEqual(L([1, 3]).dropWhile(()=>true).toArray(), []);
 	t.deepEqual(L([0, 1, 2]).dropWhile(even).toArray(), [1, 2]);
 	t.end();
 });
@@ -114,7 +114,7 @@ test('intersperse', t => {
 });
 
 test('reduce', t => {
-	t.deepEqual(L([]).reduce(add), undefined);
+	t.deepEqual(L(<number[]>[]).reduce(add), undefined);
 	t.deepEqual(L([]).reduce(add, 0), 0);
 	t.deepEqual(L([1]).reduce(add, 0), 1);
 	t.deepEqual(L(range(0, 1, 10)).reduce(add, 0), 45);
@@ -184,7 +184,8 @@ test('memoize', t => {
 	const b = L([0, 1]).memoize();
 	t.deepEqual(b.toArray(), [0, 1]);
 	t.deepEqual(b.toArray(), [0, 1]);
-	t.deepEqual(b['data'], [0, 1]);
+	// @ts-ignore This is testing a private variable, there is no way to test if this is actually working without doing this or changing the interface which would be extremely ugly
+	t.deepEqual(b.data, [0, 1]);
 	t.deepEqual(L([0, 1, 2, 3, 4]).filter(even).memoize().toArray(), [0, 2, 4]);
 	t.end();
 });

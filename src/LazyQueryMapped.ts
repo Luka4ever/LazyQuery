@@ -24,12 +24,16 @@ import {
 	IterableMemoizable,
 	PredicateTypeGuard,
 	Predicate,
-	Equals
+	Equals,
+    Accumulator,
+	Transform,
+	Executor,
+	Comparator
 } from './Types';
 
 export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
-	private mapFunction: (value: T) => U;
-	constructor(protected source: IterableMemoizable<T>, map: (value: T) => U) {
+	private mapFunction: Transform<T, U>;
+	constructor(protected source: IterableMemoizable<T>, map: Transform<T, U>) {
 		this.mapFunction = map;
 	}
 
@@ -62,7 +66,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		return new LazyQueryFiltered(this, predicate);
 	}
 
-	map<V>(transform: (value: U) => V): ILazyQuery<V> {
+	map<V>(transform: Transform<U, V>): ILazyQuery<V> {
 		return new LazyQueryMapped(this, transform);
 	}
 
@@ -75,12 +79,12 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 	}
 
 	takeWhile<V extends U>(predicate: PredicateTypeGuard<U, V>): ILazyQuery<V>
-	takeWhile(predicate: (value: U) => boolean): ILazyQuery<U> {
+	takeWhile(predicate: Predicate<U>): ILazyQuery<U> {
 		return new LazyQueryTakeWhile(this, predicate);
 	}
 
 	dropWhile<V extends U>(predicate: PredicateTypeGuard<U, V>): ILazyQuery<V>
-	dropWhile(predicate: (value: U) => boolean): ILazyQuery<U> {
+	dropWhile(predicate: Predicate<U>): ILazyQuery<U> {
 		return new LazyQueryDropWhile(this, predicate);
 	}
 
@@ -99,7 +103,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		return prev;
 	}
 
-	any(predicate: (value: U) => boolean): boolean {
+	any(predicate: Predicate<U>): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -111,7 +115,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		return false;
 	}
 
-	all(predicate: (value: U) => boolean): boolean {
+	all(predicate: Predicate<U>): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -140,9 +144,9 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		return new LazyQueryIntersperce(this, element);
 	}
 
-	reduce(func: (result: U, current: U) => U): U | undefined;
-	reduce<V>(func: (result: V, current: U) => V, initial: V): V;
-	reduce<V>(func: (result: V, current: U) => V, initial?: V): V | undefined {
+	reduce(func: Accumulator<U, U>): U | undefined;
+	reduce<V>(func: Accumulator<U, V>, initial: V): V;
+	reduce<V>(func: Accumulator<U, V>, initial?: V): V | undefined {
 		const iterator = this[Symbol.iterator]();
 		if (arguments.length < 2) {
 			let value = iterator.next();
@@ -196,7 +200,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		return result;
 	}
 
-	exec(func: (element: U) => void): void {
+	exec(func: Executor<U>): void {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -205,7 +209,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		}
 	}
 
-	sort(comparator: (a: U, b: U) => number): ILazyQuery<U> {
+	sort(comparator: Comparator<U>): ILazyQuery<U> {
 		if (!comparator) {
 			throw "Comparator undefined";
 		}

@@ -24,7 +24,11 @@ import {
 	IterableMemoizable,
 	PredicateTypeGuard,
 	Predicate,
-	Equals
+	Equals,
+	Accumulator,
+	Transform,
+	Executor,
+	Comparator
 } from './Types';
 
 export class LazyQuerySubsequences<T> implements ILazyQuery<T[]> {
@@ -87,7 +91,7 @@ export class LazyQuerySubsequences<T> implements ILazyQuery<T[]> {
 		return new LazyQueryFiltered(this, predicate);
 	}
 
-	map<U>(transform: (value: T[]) => U): ILazyQuery<U> {
+	map<U>(transform: Transform<T[], U>): ILazyQuery<U> {
 		return new LazyQueryMapped(this, transform);
 	}
 
@@ -100,12 +104,12 @@ export class LazyQuerySubsequences<T> implements ILazyQuery<T[]> {
 	}
 
 	takeWhile<U extends T[]>(predicate: PredicateTypeGuard<T[], U>): ILazyQuery<U>
-	takeWhile(predicate: (value: T[]) => boolean): ILazyQuery<T[]> {
+	takeWhile(predicate: Predicate<T[]>): ILazyQuery<T[]> {
 		return new LazyQueryTakeWhile(this, predicate);
 	}
 
 	dropWhile<U extends T[]>(predicate: PredicateTypeGuard<T[], U>): ILazyQuery<U>
-	dropWhile(predicate: (value: T[]) => boolean): ILazyQuery<T[]> {
+	dropWhile(predicate: Predicate<T[]>): ILazyQuery<T[]> {
 		return new LazyQueryDropWhile(this, predicate);
 	}
 
@@ -124,7 +128,7 @@ export class LazyQuerySubsequences<T> implements ILazyQuery<T[]> {
 		return prev;
 	}
 
-	any(predicate: (value: T[]) => boolean): boolean {
+	any(predicate: Predicate<T[]>): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -136,7 +140,7 @@ export class LazyQuerySubsequences<T> implements ILazyQuery<T[]> {
 		return false;
 	}
 
-	all(predicate: (value: T[]) => boolean): boolean {
+	all(predicate: Predicate<T[]>): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -165,9 +169,9 @@ export class LazyQuerySubsequences<T> implements ILazyQuery<T[]> {
 		return new LazyQueryIntersperce(this, element);
 	}
 
-	reduce(func: (result: T[], current: T[]) => T[]): T[] | undefined;
-	reduce<U>(func: (result: U, current: T[]) => U, initial: U): U;
-	reduce<U>(func: (result: U, current: T[]) => U, initial?: U): U | undefined {
+	reduce(func: Accumulator<T[], T[]>): T[] | undefined;
+	reduce<U>(func: Accumulator<T[], U>, initial: U): U;
+	reduce<U>(func: Accumulator<T[], U>, initial?: U): U | undefined {
 		const iterator = this[Symbol.iterator]();
 		if (arguments.length < 2) {
 			let value = iterator.next();
@@ -221,7 +225,7 @@ export class LazyQuerySubsequences<T> implements ILazyQuery<T[]> {
 		return result;
 	}
 
-	exec(func: (element: T[]) => void): void {
+	exec(func: Executor<T[]>): void {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -230,7 +234,7 @@ export class LazyQuerySubsequences<T> implements ILazyQuery<T[]> {
 		}
 	}
 
-	sort(comparator: (a: T[], b: T[]) => number): ILazyQuery<T[]> {
+	sort(comparator: Comparator<T[]>): ILazyQuery<T[]> {
 		if (!comparator) {
 			throw "Comparator undefined";
 		}

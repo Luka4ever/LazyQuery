@@ -11,7 +11,10 @@ import {
 	PredicateTypeGuard,
 	Predicate,
 	Transform,
-	Equals
+	Equals,
+	Accumulator,
+	Executor,
+	Comparator
 } from './Types';
 
 export class LazyQuery<T> implements ILazyQuery<T> {
@@ -60,12 +63,12 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 	}
 
 	takeWhile<U extends T>(predicate: PredicateTypeGuard<T, U>): ILazyQuery<U>
-	takeWhile(predicate: (value: T) => boolean): ILazyQuery<T> {
+	takeWhile(predicate: Predicate<T>): ILazyQuery<T> {
 		return new LazyQueryTakeWhile(this, predicate);
 	}
 
 	dropWhile<U extends T>(predicate: PredicateTypeGuard<T, U>): ILazyQuery<U>
-	dropWhile(predicate: (value: T) => boolean): ILazyQuery<T> {
+	dropWhile(predicate: Predicate<T>): ILazyQuery<T> {
 		return new LazyQueryDropWhile(this, predicate);
 	}
 
@@ -84,7 +87,7 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 		return prev;
 	}
 
-	any(predicate: (value: T) => boolean): boolean {
+	any(predicate: Predicate<T>): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -96,7 +99,7 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 		return false;
 	}
 
-	all(predicate: (value: T) => boolean): boolean {
+	all(predicate: Predicate<T>): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -125,9 +128,9 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 		return new LazyQueryIntersperce(this, element);
 	}
 
-	reduce(func: (result: T, current: T) => T): T | undefined;
-	reduce<U>(func: (result: U, current: T) => U, initial: U): U;
-	reduce<U>(func: (result: U, current: T) => U, initial?: U): U | undefined {
+	reduce(func: Accumulator<T, T>): T | undefined;
+	reduce<U>(func: Accumulator<T, U>, initial: U): U;
+	reduce<U>(func: Accumulator<T, U>, initial?: U): U | undefined {
 		const iterator = this[Symbol.iterator]();
 		if (arguments.length < 2) {
 			let value = iterator.next();
@@ -181,7 +184,7 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 		return result;
 	}
 
-	exec(func: (element: T) => void) {
+	exec(func: Executor<T>) {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -190,7 +193,7 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 		}
 	}
 
-	sort(comparator: (a: T, b: T) => number): ILazyQuery<T> {
+	sort(comparator: Comparator<T>): ILazyQuery<T> {
 		if (!comparator) {
 			throw "Comparator undefined";
 		}
@@ -391,8 +394,8 @@ export class LazyQueryIterate<T> extends LazyQuery<T> {
 }
 
 export class LazyQueryDropWhile<T> extends LazyQuery<T> {
-	private dropWhilePredicate: (value: T) => boolean;
-	constructor(source: Iterable<T>, predicate: (value: T) => boolean) {
+	private dropWhilePredicate: Predicate<T>;
+	constructor(source: Iterable<T>, predicate: Predicate<T>) {
 		super(source);
 		this.dropWhilePredicate = predicate;
 	}
@@ -488,8 +491,8 @@ export class LazyQueryTake<T> extends LazyQuery<T> {
 }
 
 export class LazyQueryTakeWhile<T> extends LazyQuery<T> {
-	private takeWhilePredicate: (value: T) => boolean;
-	constructor(source: Iterable<T>, predicate: (value: T) => boolean) {
+	private takeWhilePredicate: Predicate<T>;
+	constructor(source: Iterable<T>, predicate: Predicate<T>) {
 		super(source);
 		this.takeWhilePredicate = predicate;
 	}

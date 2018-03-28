@@ -24,7 +24,11 @@ import {
 	IterableMemoizable,
 	PredicateTypeGuard,
 	Predicate,
-	Equals
+	Equals,
+    Accumulator,
+	Transform,
+	Executor,
+	Comparator
 } from './Types';
 
 export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
@@ -65,7 +69,7 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		return new LazyQueryFiltered(this, predicate);
 	}
 
-	map<V>(transform: (value: T | U) => V): ILazyQuery<V> {
+	map<V>(transform: Transform<T | U, V>): ILazyQuery<V> {
 		return new LazyQueryMapped(this, transform);
 	}
 
@@ -78,12 +82,12 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 	}
 
 	takeWhile<V extends (T | U)>(predicate: PredicateTypeGuard<T | U, V>): ILazyQuery<V>
-	takeWhile(predicate: (value: T | U) => boolean): ILazyQuery<T | U> {
+	takeWhile(predicate: Predicate<T | U>): ILazyQuery<T | U> {
 		return new LazyQueryTakeWhile(this, predicate);
 	}
 
 	dropWhile<V extends (T | U)>(predicate: PredicateTypeGuard<T | U, V>): ILazyQuery<V>
-	dropWhile(predicate: (value: T | U) => boolean): ILazyQuery<T | U> {
+	dropWhile(predicate: Predicate<T | U>): ILazyQuery<T | U> {
 		return new LazyQueryDropWhile(this, predicate);
 	}
 
@@ -102,7 +106,7 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		return prev;
 	}
 
-	any(predicate: (value: T | U) => boolean): boolean {
+	any(predicate: Predicate<T | U>): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -114,7 +118,7 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		return false;
 	}
 
-	all(predicate: (value: T | U) => boolean): boolean {
+	all(predicate: Predicate<T | U>): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -143,9 +147,9 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		return new LazyQueryIntersperce(this, element);
 	}
 
-	reduce(func: (result: T | U, current: T | U) => T | U): T | U | undefined;
-	reduce<V>(func: (result: V, current: T | U) => V, initial: V): V;
-	reduce<V>(func: (result: V, current: T | U) => V, initial?: V): V | undefined {
+	reduce(func: Accumulator<T | U, T | U>): T | U | undefined;
+	reduce<V>(func: Accumulator<T | U, V>, initial: V): V;
+	reduce<V>(func: Accumulator<T | U, V>, initial?: V): V | undefined {
 		const iterator = this[Symbol.iterator]();
 		if (arguments.length < 2) {
 			let value = iterator.next();
@@ -199,7 +203,7 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		return result;
 	}
 
-	exec(func: (element: T | U) => void): void {
+	exec(func: Executor<T | U>): void {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -208,7 +212,7 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		}
 	}
 
-	sort(comparator: (a: T | U, b: T | U) => number): ILazyQuery<T | U> {
+	sort(comparator: Comparator<T | U>): ILazyQuery<T | U> {
 		if (!comparator) {
 			throw "Comparator undefined";
 		}
