@@ -248,3 +248,9 @@ Calculates the average of a sequence of numbers given a function to transform th
 ```sh
 L('abc').average(char => char.charCodeAt(0)) -> 98
 ```
+
+#### contains(element)
+Determines if the collection contains a given element
+```sh
+L([1, 2, 3]).contains(2) -> true
+```

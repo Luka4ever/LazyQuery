@@ -303,3 +303,12 @@ test('average', t => {
 	t.deepEqual(L('abc').average(char => char.charCodeAt(0)), 'b'.charCodeAt(0));
 	t.end();
 });
+
+test('contains', t => {
+	t.deepEqual(L([1, 2, 3]).contains(4), false);
+	t.deepEqual(L([1, 2, 3]).contains(2), true);
+	const obj = {};
+	t.deepEqual(L([{}]).contains(obj), false);
+	t.deepEqual(L([obj]).contains(obj), true);
+	t.end();
+});

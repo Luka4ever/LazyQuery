@@ -367,4 +367,16 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		}
 		return count > 0 ? total / count : 0;
 	}
+
+	contains(element: U): boolean {
+		const iterator = this[Symbol.iterator]();
+		let value = iterator.next();
+		while (!value.done) {
+			if (value.value === element) {
+				return true;
+			}
+			value = iterator.next();
+		}
+		return false;
+	}
 }

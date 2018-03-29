@@ -337,4 +337,13 @@ export interface ILazyQuery<T> extends IterableMemoizable<T> {
 	 * @memberof ILazyQuery
 	 */
 	average(this: ILazyQuery<number>): number;
+
+	/**
+	 * Determines if the collection contains a given element
+	 *
+	 * @param {T} element The element to check for
+	 * @returns {boolean} True if the collection contains the element, otherwise false
+	 * @memberof ILazyQuery
+	 */
+	contains(element: T): boolean;
 }

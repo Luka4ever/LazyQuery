@@ -370,4 +370,16 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		}
 		return count > 0 ? total / count : 0;
 	}
+
+	contains(element: T | U): boolean {
+		const iterator = this[Symbol.iterator]();
+		let value = iterator.next();
+		while (!value.done) {
+			if (value.value === element) {
+				return true;
+			}
+			value = iterator.next();
+		}
+		return false;
+	}
 }

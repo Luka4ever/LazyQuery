@@ -351,6 +351,18 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 		}
 		return count > 0 ? total / count : 0;
 	}
+
+	contains(element: T): boolean {
+		const iterator = this[Symbol.iterator]();
+		let value = iterator.next();
+		while (!value.done) {
+			if (value.value === element) {
+				return true;
+			}
+			value = iterator.next();
+		}
+		return false;
+	}
 }
 
 export class LazyQueryCycle<T> extends LazyQuery<T> {
