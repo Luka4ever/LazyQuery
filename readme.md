@@ -125,6 +125,12 @@ Determines the number of elements in the collection
 L([0, 0, 1]).count() -> 3
 ```
 
+#### count(predicate)
+Determines the number of elements in the collection that pass a given predicate function
+```sh
+L([0, 1, 2]).count(v=>v%2===0) -> 2
+```
+
 #### exec()
 Executes a function on each element in the collection
 ```sh

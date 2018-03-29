@@ -192,13 +192,24 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 		return this[Symbol.iterator]().next().done;
 	}
 
-	count(): number {
+	count(): number;
+	count(predicate: Predicate<Tuple<T, U>>): number;
+	count(predicate?: Predicate<Tuple<T, U>>): number {
 		let result = 0;
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
-		while (!value.done) {
-			result++;
-			value = iterator.next();
+		if (predicate) {
+			while (!value.done) {
+				if (predicate(value.value)) {
+					result++;
+				}
+				value = iterator.next();
+			}
+		} else {
+			while (!value.done) {
+				result++;
+				value = iterator.next();
+			}
 		}
 		return result;
 	}

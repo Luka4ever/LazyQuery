@@ -211,13 +211,25 @@ export class LazyQueryPermutations<T> implements ILazyQuery<T[]> {
 		return this[Symbol.iterator]().next().done;
 	}
 
-	count(): number {
+
+	count(): number;
+	count(predicate: Predicate<T[]>): number;
+	count(predicate?: Predicate<T[]>): number {
 		let result = 0;
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
-		while (!value.done) {
-			result++;
-			value = iterator.next();
+		if (predicate) {
+			while (!value.done) {
+				if (predicate(value.value)) {
+					result++;
+				}
+				value = iterator.next();
+			}
+		} else {
+			while (!value.done) {
+				result++;
+				value = iterator.next();
+			}
 		}
 		return result;
 	}

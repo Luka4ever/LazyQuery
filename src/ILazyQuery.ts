@@ -195,6 +195,15 @@ export interface ILazyQuery<T> extends IterableMemoizable<T> {
 	count(): number;
 
 	/**
+	 * Determines the number of elements in the collection that pass a given predicate function
+	 *
+	 * @param {Predicate<T>} predicate The predicate to test against
+	 * @returns {number} The number of elements in the collection that pass the predicate
+	 * @memberof ILazyQuery
+	 */
+	count(predicate: Predicate<T>): number;
+
+	/**
 	 * Executes a function on each element in the collection
 	 * @param {executor<T>} func The function to execute with each element in the collection
 	 */

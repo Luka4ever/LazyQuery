@@ -156,6 +156,7 @@ test('isEmpty', t => {
 test('count', t => {
 	t.deepEqual(L([]).count(), 0);
 	t.deepEqual(L([0, 0, 1]).count(), 3);
+	t.deepEqual(L([0, 1, 2, 3, 4]).count(even), 3);
 	t.end();
 });
 
