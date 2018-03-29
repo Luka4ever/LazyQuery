@@ -246,5 +246,5 @@ L([1, 2, 6]).average()) -> 3
 #### average(transform)
 Calculates the average of a sequence of numbers given a function to transform the elements in the collection to numbers
 ```sh
-L('abc').average(char => char.charCodeAt(0)), 'b'.charCodeAt(0)
+L('abc').average(char => char.charCodeAt(0)) -> 98
 ```
