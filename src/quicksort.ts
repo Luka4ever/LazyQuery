@@ -1,4 +1,10 @@
-export function quicksort<T>(arr: T[], left: number, right: number, div: number, comparator: (a: T, b: T) => number): T[] {
+export function quicksort<T>(
+	arr: T[],
+	left: number,
+	right: number,
+	div: number,
+	comparator: (a: T, b: T) => number
+): T[] {
 	const length: number = right - left;
 	let temp: T;
 	let tempIndex: number;
@@ -48,7 +54,7 @@ export function quicksort<T>(arr: T[], left: number, right: number, div: number,
 			arr[k] = arr[less];
 			arr[less++] = temp;
 		} else if (comparator(arr[k], pivot2) > 0) {
-			while ((k < great) && (comparator(arr[great], pivot2) > 0)) {
+			while (k < great && comparator(arr[great], pivot2) > 0) {
 				great--;
 			}
 			temp = arr[k];

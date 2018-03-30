@@ -35,7 +35,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		this.mapFunction = map;
 	}
 
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<U> {
+	*[Symbol.iterator](onlyMemoized?: boolean): Iterator<U> {
 		const iterator = this.source[Symbol.iterator](onlyMemoized);
 		let value = iterator.next();
 		while (!value.done) {
@@ -49,7 +49,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 	}
 
 	toString(): string {
-		let s = "";
+		let s = '';
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -59,7 +59,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		return s;
 	}
 
-	filter(predicate: Predicate<U>): ILazyQuery<U>
+	filter(predicate: Predicate<U>): ILazyQuery<U>;
 	filter<V extends U>(predicate: PredicateTypeGuard<U, V>): ILazyQuery<V> {
 		return new LazyQueryFiltered(this, predicate);
 	}
@@ -149,7 +149,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 			if (value.done) {
 				return undefined;
 			}
-			let result = value.value as any as V;
+			let result = (value.value as any) as V;
 			value = iterator.next();
 			while (!value.done) {
 				result = func(result, value.value);
@@ -218,7 +218,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 
 	sort(comparator: Comparator<U>): ILazyQuery<U> {
 		if (!comparator) {
-			throw "Comparator undefined";
+			throw 'Comparator undefined';
 		}
 		// dual-pivot-quick-sort
 		const array = this.toArray();
@@ -368,7 +368,7 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		} else {
 			while (!value.done) {
 				count++;
-				total += value.value as any as number;
+				total += (value.value as any) as number;
 				value = iterator.next();
 			}
 		}

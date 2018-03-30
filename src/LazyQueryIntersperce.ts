@@ -30,10 +30,9 @@ import {
 } from './Types';
 
 export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
-	constructor(protected source: IterableMemoizable<T>, private intersperseElement: U) {
-	}
+	constructor(protected source: IterableMemoizable<T>, private intersperseElement: U) {}
 
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T | U> {
+	*[Symbol.iterator](onlyMemoized?: boolean): Iterator<T | U> {
 		const iterator = this.source[Symbol.iterator](onlyMemoized);
 		let value = iterator.next();
 		if (!value.done) {
@@ -52,7 +51,7 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 	}
 
 	toString(): string {
-		let s = "";
+		let s = '';
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -62,8 +61,8 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		return s;
 	}
 
-	filter(predicate: Predicate<T | U>): ILazyQuery<T | U>
-	filter<V extends (T|U)>(predicate: PredicateTypeGuard<T | U, V>): ILazyQuery<V> {
+	filter(predicate: Predicate<T | U>): ILazyQuery<T | U>;
+	filter<V extends T | U>(predicate: PredicateTypeGuard<T | U, V>): ILazyQuery<V> {
 		return new LazyQueryFiltered(this, predicate);
 	}
 
@@ -152,7 +151,7 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 			if (value.done) {
 				return undefined;
 			}
-			let result = value.value as any as V;
+			let result = (value.value as any) as V;
 			value = iterator.next();
 			while (!value.done) {
 				result = func(result, value.value);
@@ -221,7 +220,7 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 
 	sort(comparator: Comparator<T | U>): ILazyQuery<T | U> {
 		if (!comparator) {
-			throw "Comparator undefined";
+			throw 'Comparator undefined';
 		}
 		// dual-pivot-quick-sort
 		const array = this.toArray();
@@ -371,7 +370,7 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		} else {
 			while (!value.done) {
 				count++;
-				total += value.value as any as number;
+				total += (value.value as any) as number;
 				value = iterator.next();
 			}
 		}

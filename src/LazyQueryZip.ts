@@ -32,10 +32,9 @@ import {
 import { Tuple } from './Tuple';
 
 export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
-	constructor(protected sourceA: IterableMemoizable<T>, protected sourceB: IterableMemoizable<U>) {
-	}
+	constructor(protected sourceA: IterableMemoizable<T>, protected sourceB: IterableMemoizable<U>) {}
 
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<Tuple<T, U>> {
+	*[Symbol.iterator](onlyMemoized?: boolean): Iterator<Tuple<T, U>> {
 		const iteratorA = this.sourceA[Symbol.iterator](onlyMemoized);
 		const iteratorB = this.sourceB[Symbol.iterator](onlyMemoized);
 		let valueA = iteratorA.next();
@@ -52,7 +51,7 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 	}
 
 	toString(): string {
-		let s = "";
+		let s = '';
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -62,7 +61,7 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 		return s;
 	}
 
-	filter(predicate: Predicate<Tuple<T, U>>): ILazyQuery<Tuple<T, U>>
+	filter(predicate: Predicate<Tuple<T, U>>): ILazyQuery<Tuple<T, U>>;
 	filter<V extends Tuple<T, U>>(predicate: PredicateTypeGuard<Tuple<T, U>, V>): ILazyQuery<V> {
 		return new LazyQueryFiltered(this, predicate);
 	}
@@ -83,7 +82,7 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 		return new LazyQueryTakeWhile(this, predicate);
 	}
 
-	dropWhile(predicate: Predicate<Tuple<T,U>>): ILazyQuery<Tuple<T, U>> {
+	dropWhile(predicate: Predicate<Tuple<T, U>>): ILazyQuery<Tuple<T, U>> {
 		return new LazyQueryDropWhile(this, predicate);
 	}
 
@@ -152,7 +151,7 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 			if (value.done) {
 				return undefined;
 			}
-			let result = value.value as any as V;
+			let result = (value.value as any) as V;
 			value = iterator.next();
 			while (!value.done) {
 				result = func(result, value.value);
@@ -221,7 +220,7 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 
 	sort(comparator: Comparator<Tuple<T, U>>): ILazyQuery<Tuple<T, U>> {
 		if (!comparator) {
-			throw "Comparator undefined";
+			throw 'Comparator undefined';
 		}
 		// dual-pivot-quick-sort
 		const array = this.toArray();
@@ -371,7 +370,7 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 		} else {
 			while (!value.done) {
 				count++;
-				total += value.value as any as number;
+				total += (value.value as any) as number;
 				value = iterator.next();
 			}
 		}

@@ -30,10 +30,9 @@ import {
 } from './Types';
 
 export class LazyQueryTranspose<T> implements ILazyQuery<Iterable<T>> {
-	constructor(protected source: IterableMemoizable<Iterable<T>>) {
-	}
+	constructor(protected source: IterableMemoizable<Iterable<T>>) {}
 
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<Iterable<T>> {
+	*[Symbol.iterator](onlyMemoized?: boolean): Iterator<Iterable<T>> {
 		const collectionIterators = [];
 		const iterator = this.source[Symbol.iterator](onlyMemoized);
 		let value = iterator.next();
@@ -63,7 +62,7 @@ export class LazyQueryTranspose<T> implements ILazyQuery<Iterable<T>> {
 	}
 
 	toString(): string {
-		let s = "";
+		let s = '';
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -73,7 +72,7 @@ export class LazyQueryTranspose<T> implements ILazyQuery<Iterable<T>> {
 		return s;
 	}
 
-	filter(predicate: Predicate<Iterable<T>>): ILazyQuery<Iterable<T>>
+	filter(predicate: Predicate<Iterable<T>>): ILazyQuery<Iterable<T>>;
 	filter<U extends Iterable<T>>(predicate: PredicateTypeGuard<Iterable<T>, U>): ILazyQuery<U> {
 		return new LazyQueryFiltered(this, predicate);
 	}
@@ -163,7 +162,7 @@ export class LazyQueryTranspose<T> implements ILazyQuery<Iterable<T>> {
 			if (value.done) {
 				return undefined;
 			}
-			let result = value.value as any as U;
+			let result = (value.value as any) as U;
 			value = iterator.next();
 			while (!value.done) {
 				result = func(result, value.value);
@@ -232,7 +231,7 @@ export class LazyQueryTranspose<T> implements ILazyQuery<Iterable<T>> {
 
 	sort(comparator: Comparator<Iterable<T>>): ILazyQuery<Iterable<T>> {
 		if (!comparator) {
-			throw "Comparator undefined";
+			throw 'Comparator undefined';
 		}
 		// dual-pivot-quick-sort
 		const array: Iterable<T>[] = this.toArray();
@@ -382,7 +381,7 @@ export class LazyQueryTranspose<T> implements ILazyQuery<Iterable<T>> {
 		} else {
 			while (!value.done) {
 				count++;
-				total += value.value as any as number;
+				total += (value.value as any) as number;
 				value = iterator.next();
 			}
 		}
