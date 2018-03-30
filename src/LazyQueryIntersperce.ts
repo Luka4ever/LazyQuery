@@ -1,32 +1,30 @@
 import { ILazyQuery } from './ILazyQuery';
-import {
-	LazyQuery,
-	LazyQueryAppend,
-	LazyQueryCycle,
-	LazyQueryDrop,
-	LazyQueryDropWhile,
-	LazyQueryIterate,
-	LazyQueryMemoize,
-	LazyQueryOnlyMemoized,
-	LazyQueryPrepend,
-	LazyQueryTake,
-	LazyQueryTakeWhile,
-	LazyQueryTranspose,
-	LazyQueryUnique
-} from './LazyQuery';
+import { LazyQuery } from './LazyQuery';
+import { LazyQueryAppend } from './LazyQueryAppend';
 import { LazyQueryConcat } from './LazyQueryConcat';
+import { LazyQueryCycle } from './LazyQueryCycle';
+import { LazyQueryDrop } from './LazyQueryDrop';
+import { LazyQueryDropWhile } from './LazyQueryDropWhile';
 import { LazyQueryFiltered } from './LazyQueryFiltered';
+import { LazyQueryIterate } from './LazyQueryIterate';
 import { LazyQueryMapped } from './LazyQueryMapped';
+import { LazyQueryMemoize } from './LazyQueryMemoize';
+import { LazyQueryOnlyMemoized } from './LazyQueryOnlyMemoized';
 import { LazyQueryPermutations } from './LazyQueryPermutations';
+import { LazyQueryPrepend } from './LazyQueryPrepend';
 import { LazyQuerySubsequences } from './LazyQuerySubsequences';
+import { LazyQueryTake } from './LazyQueryTake';
+import { LazyQueryTakeWhile } from './LazyQueryTakeWhile';
+import { LazyQueryTranspose } from './LazyQueryTranspose';
+import { LazyQueryUnique } from './LazyQueryUnique';
 import { quicksort } from './quicksort';
 import {
 	IterableMemoizable,
 	PredicateTypeGuard,
 	Predicate,
-	Equals,
-    Accumulator,
 	Transform,
+	Equals,
+	Accumulator,
 	Executor,
 	Comparator
 } from './Types';
@@ -81,12 +79,10 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		return new LazyQueryDrop(this, count);
 	}
 
-	takeWhile<V extends (T | U)>(predicate: PredicateTypeGuard<T | U, V>): ILazyQuery<V>
 	takeWhile(predicate: Predicate<T | U>): ILazyQuery<T | U> {
 		return new LazyQueryTakeWhile(this, predicate);
 	}
 
-	dropWhile<V extends (T | U)>(predicate: PredicateTypeGuard<T | U, V>): ILazyQuery<V>
 	dropWhile(predicate: Predicate<T | U>): ILazyQuery<T | U> {
 		return new LazyQueryDropWhile(this, predicate);
 	}
@@ -191,7 +187,6 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 	isEmpty(): boolean {
 		return this[Symbol.iterator]().next().done;
 	}
-
 
 	count(): number;
 	count(predicate: Predicate<T | U>): number;

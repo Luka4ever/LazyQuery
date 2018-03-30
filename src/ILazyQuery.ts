@@ -62,25 +62,10 @@ export interface ILazyQuery<T> extends IterableMemoizable<T> {
 
 	/**
 	 * Takes elements from the collection as long as the supplied predicate when called on the current element returns true
-	 * @param {PredicateTypeGuard<T, U>} predicate The function to test the elements against
-	 * @return {ILazyQuery<U>} A new collection
-	 */
-	takeWhile<U extends T>(predicate: PredicateTypeGuard<T, U>): ILazyQuery<U>;
-
-	/**
-	 * Takes elements from the collection as long as the supplied predicate when called on the current element returns true
 	 * @param {Predicate<T>} predicate The function to test the elements against
 	 * @return {ILazyQuery<T>} A new collection
 	 */
 	takeWhile(predicate: Predicate<T>): ILazyQuery<T>;
-
-
-	/**
-	 * Drops elements from the collection as long as the supplied predicate when called on the current element returns true
-	 * @param {PredicateTypeGuard<T, U>} predicate The function to test the elements against
-	 * @return {ILazyQuery<T>} A new collection
-	 */
-	dropWhile<U extends T>(predicate: PredicateTypeGuard<T, U>): ILazyQuery<U>;
 
 	/**
 	 * Drops elements from the collection as long as the supplied predicate when called on the current element returns true

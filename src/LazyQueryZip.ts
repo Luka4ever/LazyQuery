@@ -1,33 +1,31 @@
 import { ILazyQuery } from './ILazyQuery';
-import {
-	LazyQuery,
-	LazyQueryAppend,
-	LazyQueryCycle,
-	LazyQueryDrop,
-	LazyQueryDropWhile,
-	LazyQueryIterate,
-	LazyQueryMemoize,
-	LazyQueryOnlyMemoized,
-	LazyQueryPrepend,
-	LazyQueryTake,
-	LazyQueryTakeWhile,
-	LazyQueryTranspose,
-	LazyQueryUnique
-} from './LazyQuery';
+import { LazyQuery } from './LazyQuery';
+import { LazyQueryAppend } from './LazyQueryAppend';
 import { LazyQueryConcat } from './LazyQueryConcat';
+import { LazyQueryCycle } from './LazyQueryCycle';
+import { LazyQueryDrop } from './LazyQueryDrop';
+import { LazyQueryDropWhile } from './LazyQueryDropWhile';
 import { LazyQueryFiltered } from './LazyQueryFiltered';
 import { LazyQueryIntersperce } from './LazyQueryIntersperce';
+import { LazyQueryIterate } from './LazyQueryIterate';
 import { LazyQueryMapped } from './LazyQueryMapped';
+import { LazyQueryMemoize } from './LazyQueryMemoize';
+import { LazyQueryOnlyMemoized } from './LazyQueryOnlyMemoized';
 import { LazyQueryPermutations } from './LazyQueryPermutations';
+import { LazyQueryPrepend } from './LazyQueryPrepend';
 import { LazyQuerySubsequences } from './LazyQuerySubsequences';
+import { LazyQueryTake } from './LazyQueryTake';
+import { LazyQueryTakeWhile } from './LazyQueryTakeWhile';
+import { LazyQueryTranspose } from './LazyQueryTranspose';
+import { LazyQueryUnique } from './LazyQueryUnique';
 import { quicksort } from './quicksort';
 import {
 	IterableMemoizable,
 	PredicateTypeGuard,
 	Predicate,
-	Equals,
-    Accumulator,
 	Transform,
+	Equals,
+	Accumulator,
 	Executor,
 	Comparator
 } from './Types';
@@ -81,12 +79,10 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 		return new LazyQueryDrop(this, count);
 	}
 
-	takeWhile<V extends Tuple<T, U>>(predicate: PredicateTypeGuard<Tuple<T, U>, V>): ILazyQuery<V>
 	takeWhile(predicate: Predicate<Tuple<T, U>>): ILazyQuery<Tuple<T, U>> {
 		return new LazyQueryTakeWhile(this, predicate);
 	}
 
-	dropWhile<V extends Tuple<T, U>>(predicate: PredicateTypeGuard<Tuple<T, U>, V>): ILazyQuery<V>
 	dropWhile(predicate: Predicate<Tuple<T,U>>): ILazyQuery<Tuple<T, U>> {
 		return new LazyQueryDropWhile(this, predicate);
 	}

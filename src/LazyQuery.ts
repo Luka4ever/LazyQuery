@@ -1,10 +1,22 @@
 import { ILazyQuery } from './ILazyQuery';
+import { LazyQueryAppend } from './LazyQueryAppend';
 import { LazyQueryConcat } from './LazyQueryConcat';
+import { LazyQueryCycle } from './LazyQueryCycle';
+import { LazyQueryDrop } from './LazyQueryDrop';
+import { LazyQueryDropWhile } from './LazyQueryDropWhile';
 import { LazyQueryFiltered } from './LazyQueryFiltered';
 import { LazyQueryIntersperce } from './LazyQueryIntersperce';
+import { LazyQueryIterate } from './LazyQueryIterate';
 import { LazyQueryMapped } from './LazyQueryMapped';
+import { LazyQueryMemoize } from './LazyQueryMemoize';
+import { LazyQueryOnlyMemoized } from './LazyQueryOnlyMemoized';
 import { LazyQueryPermutations } from './LazyQueryPermutations';
+import { LazyQueryPrepend } from './LazyQueryPrepend';
 import { LazyQuerySubsequences } from './LazyQuerySubsequences';
+import { LazyQueryTake } from './LazyQueryTake';
+import { LazyQueryTakeWhile } from './LazyQueryTakeWhile';
+import { LazyQueryTranspose } from './LazyQueryTranspose';
+import { LazyQueryUnique } from './LazyQueryUnique';
 import { quicksort } from './quicksort';
 import {
 	IterableMemoizable,
@@ -62,12 +74,10 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 		return new LazyQueryDrop(this, count);
 	}
 
-	takeWhile<U extends T>(predicate: PredicateTypeGuard<T, U>): ILazyQuery<U>
 	takeWhile(predicate: Predicate<T>): ILazyQuery<T> {
 		return new LazyQueryTakeWhile(this, predicate);
 	}
 
-	dropWhile<U extends T>(predicate: PredicateTypeGuard<T, U>): ILazyQuery<U>
 	dropWhile(predicate: Predicate<T>): ILazyQuery<T> {
 		return new LazyQueryDropWhile(this, predicate);
 	}
@@ -373,296 +383,5 @@ export class LazyQuery<T> implements ILazyQuery<T> {
 			value = iterator.next();
 		}
 		return false;
-	}
-}
-
-export class LazyQueryCycle<T> extends LazyQuery<T> {
-	constructor(source: Iterable<T>) {
-		super(source);
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
-		let iterator = this.source[Symbol.iterator](onlyMemoized);
-		let value = iterator.next();
-		while (!value.done) {
-			while (!value.done) {
-				yield value.value;
-				value = iterator.next();
-			}
-			iterator = this.source[Symbol.iterator](onlyMemoized);
-			value = iterator.next();
-		}
-	}
-}
-
-export class LazyQueryDrop<T> extends LazyQuery<T> {
-	private dropCount: number;
-	constructor(source: Iterable<T>, drop: number) {
-		super(source);
-		this.dropCount = drop;
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
-		const iterator = this.source[Symbol.iterator](onlyMemoized);
-		let value = iterator.next();
-		let i = 0;
-		while (!value.done && i < this.dropCount) {
-			i++;
-			value = iterator.next();
-		}
-		while (!value.done) {
-			yield value.value;
-			value = iterator.next();
-		}
-	}
-}
-
-export class LazyQueryIterate<T> extends LazyQuery<T> {
-	private iterateFunction: (value: T) => T;
-	constructor(source: Iterable<T>, iterateFunction: (value: T) => T) {
-		super(source);
-		this.iterateFunction = iterateFunction;
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
-		const iterator: Iterator<T> = this.source[Symbol.iterator](onlyMemoized);
-		let value = iterator.next();
-		while (!value.done) {
-			let permutation = value.value;
-			while (true) {
-				yield permutation;
-				permutation = this.iterateFunction(permutation);
-			}
-		}
-	}
-}
-
-export class LazyQueryDropWhile<T> extends LazyQuery<T> {
-	private dropWhilePredicate: Predicate<T>;
-	constructor(source: Iterable<T>, predicate: Predicate<T>) {
-		super(source);
-		this.dropWhilePredicate = predicate;
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
-		const iterator = this.source[Symbol.iterator](onlyMemoized);
-		let value = iterator.next();
-		while (!value.done && this.dropWhilePredicate(value.value)) {
-			value = iterator.next();
-		}
-		while (!value.done) {
-			yield value.value;
-			value = iterator.next();
-		}
-	}
-}
-
-export class LazyQueryMemoize<T> extends LazyQuery<T> {
-	private data: T[] = [];
-	private iterator: Iterator<T>;
-	constructor(source: Iterable<T>) {
-		super(source);
-		this.iterator = source[Symbol.iterator]();
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
-		let i = 0;
-		while (true) {
-			if (i < this.data.length) {
-				yield this.data[i++];
-			} else if (onlyMemoized) {
-				break;
-			} else {
-				let value = this.iterator.next();
-				if (value.done) {
-					break;
-				}
-				this.data.push(value.value);
-				i++;
-				yield value.value;
-			}
-		}
-	}
-
-	get(index: number): T | undefined {
-		if (this.data.length > index) {
-			return this.data[index];
-		}
-		let value = this.iterator.next();
-		while (!value.done) {
-			this.data.push(value.value);
-			if (this.data.length > index) {
-				return this.data[index];
-			}
-			value = this.iterator.next();
-		}
-		return undefined;
-	}
-}
-
-export class LazyQueryOnlyMemoized<T> extends LazyQuery<T> {
-	constructor(source: Iterable<T>) {
-		super(source);
-	}
-
-	* [Symbol.iterator](): Iterator<T> {
-		const iterator = this.source[Symbol.iterator](true);
-		let value = iterator.next();
-		while (!value.done) {
-			yield value.value;
-			value = iterator.next();
-		}
-	}
-}
-
-export class LazyQueryTake<T> extends LazyQuery<T> {
-	private takeCount: number;
-	constructor(source: Iterable<T>, take: number) {
-		super(source);
-		this.takeCount = take;
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
-		const iterator = this.source[Symbol.iterator](onlyMemoized);
-		let value = iterator.next();
-		let i = 0;
-		while (!value.done && i < this.takeCount) {
-			yield value.value;
-			i++;
-			value = iterator.next();
-		}
-	}
-}
-
-export class LazyQueryTakeWhile<T> extends LazyQuery<T> {
-	private takeWhilePredicate: Predicate<T>;
-	constructor(source: Iterable<T>, predicate: Predicate<T>) {
-		super(source);
-		this.takeWhilePredicate = predicate;
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
-		const iterator = this.source[Symbol.iterator](onlyMemoized);
-		let value = iterator.next();
-		while (!value.done && this.takeWhilePredicate(value.value)) {
-			yield value.value;
-			value = iterator.next();
-		}
-	}
-}
-
-export class LazyQueryTranspose<T> extends LazyQuery<Iterable<T>> {
-	constructor(source: Iterable<Iterable<T>>) {
-		super(source);
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<Iterable<T>> {
-		const collectionIterators = [];
-		const iterator = this.source[Symbol.iterator](onlyMemoized);
-		let value = iterator.next();
-		while (!value.done) {
-			collectionIterators.push(value.value[Symbol.iterator]());
-			value = iterator.next();
-		}
-		while (true) {
-			const result = [];
-			for (let i = 0; i < collectionIterators.length; i++) {
-				const value = collectionIterators[i].next();
-				if (value.done) {
-					collectionIterators.splice(i--, 1);
-				} else {
-					result.push(value.value);
-				}
-			}
-			if (result.length === 0) {
-				break;
-			}
-			yield result;
-		}
-	}
-}
-
-export class LazyQueryUnique<T> extends LazyQuery<T> {
-	constructor(source: Iterable<T>, protected equals?: Equals<T>) {
-		super(source);
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
-		const iterator = this.source[Symbol.iterator](onlyMemoized);
-		let value = iterator.next();
-		let values = [];
-		if (typeof this.equals === 'function') {
-			while (!value.done) {
-				let unique = true;
-				for (let i = 0; i < values.length; i++) {
-					if (this.equals(values[i], value.value)) {
-						unique = false;
-						break;
-					}
-				}
-				if (unique) {
-					yield value.value;
-					values.push(value.value);
-				}
-				value = iterator.next();
-			}
-		} else {
-			while (!value.done) {
-				let unique = true;
-				for (let i = 0; i < values.length; i++) {
-					if (values[i] === value.value) {
-						unique = false;
-						break;
-					}
-				}
-				if (unique) {
-					yield value.value;
-					values.push(value.value);
-				}
-				value = iterator.next();
-			}
-		}
-	}
-}
-
-export class LazyQueryAppend<T, U> extends LazyQuery<T | U> {
-	constructor(source: IterableMemoizable<T>, protected appendix: IterableMemoizable<U>) {
-		super(source);
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T | U> {
-		let iterator: Iterator<T | U> = this.source[Symbol.iterator](onlyMemoized);
-		let value = iterator.next();
-		while (!value.done) {
-			yield value.value;
-			value = iterator.next();
-		}
-		iterator = this.appendix[Symbol.iterator](onlyMemoized);
-		value = iterator.next();
-		while (!value.done) {
-			yield value.value;
-			value = iterator.next();
-		}
-	}
-}
-
-export class LazyQueryPrepend<T, U> extends LazyQuery<T | U> {
-	constructor(source: IterableMemoizable<T>, protected appendix: IterableMemoizable<U>) {
-		super(source);
-	}
-
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T | U> {
-		let iterator: Iterator<T | U> = this.appendix[Symbol.iterator](onlyMemoized);
-		let value = iterator.next();
-		while (!value.done) {
-			yield value.value;
-			value = iterator.next();
-		}
-		iterator = this.source[Symbol.iterator](onlyMemoized);
-		value = iterator.next();
-		while (!value.done) {
-			yield value.value;
-			value = iterator.next();
-		}
 	}
 }

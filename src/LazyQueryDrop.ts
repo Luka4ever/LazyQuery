@@ -3,8 +3,8 @@ import { LazyQuery } from './LazyQuery';
 import { LazyQueryAppend } from './LazyQueryAppend';
 import { LazyQueryConcat } from './LazyQueryConcat';
 import { LazyQueryCycle } from './LazyQueryCycle';
-import { LazyQueryDrop } from './LazyQueryDrop';
 import { LazyQueryDropWhile } from './LazyQueryDropWhile';
+import { LazyQueryFiltered } from './LazyQueryFiltered';
 import { LazyQueryIntersperce } from './LazyQueryIntersperce';
 import { LazyQueryIterate } from './LazyQueryIterate';
 import { LazyQueryMapped } from './LazyQueryMapped';
@@ -29,24 +29,27 @@ import {
 	Comparator
 } from './Types';
 
-export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
-	private queryFilter: PredicateTypeGuard<T, U>;
-	constructor(protected source: IterableMemoizable<T>, filter: PredicateTypeGuard<T, U>) {
-		this.queryFilter = filter;
+export class LazyQueryDrop<T> implements ILazyQuery<T> {
+	private dropCount: number;
+	constructor(protected source: IterableMemoizable<T>, drop: number) {
+		this.dropCount = drop;
 	}
 
-	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<U> {
+	* [Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
 		const iterator = this.source[Symbol.iterator](onlyMemoized);
 		let value = iterator.next();
+		let i = 0;
+		while (!value.done && i < this.dropCount) {
+			i++;
+			value = iterator.next();
+		}
 		while (!value.done) {
-			if (this.queryFilter(value.value)) {
-				yield value.value;
-			}
+			yield value.value;
 			value = iterator.next();
 		}
 	}
 
-	toArray(): U[] {
+	toArray(): T[] {
 		return [...this];
 	}
 
@@ -61,36 +64,36 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return s;
 	}
 
-	filter(predicate: Predicate<U>): ILazyQuery<U>
-	filter<V extends U>(predicate: PredicateTypeGuard<U, V>): ILazyQuery<V> {
+	filter(predicate: Predicate<T>): ILazyQuery<T>
+	filter<U extends T>(predicate: PredicateTypeGuard<T, U>): ILazyQuery<U> {
 		return new LazyQueryFiltered(this, predicate);
 	}
 
-	map<V>(transform: Transform<U, V>): ILazyQuery<V> {
+	map<U>(transform: Transform<T, U>): ILazyQuery<U> {
 		return new LazyQueryMapped(this, transform);
 	}
 
-	take(count: number): ILazyQuery<U> {
+	take(count: number): ILazyQuery<T> {
 		return new LazyQueryTake(this, count);
 	}
 
-	drop(count: number): ILazyQuery<U> {
+	drop(count: number): ILazyQuery<T> {
 		return new LazyQueryDrop(this, count);
 	}
 
-	takeWhile(predicate: Predicate<U>): ILazyQuery<U> {
+	takeWhile(predicate: Predicate<T>): ILazyQuery<T> {
 		return new LazyQueryTakeWhile(this, predicate);
 	}
 
-	dropWhile(predicate: Predicate<U>): ILazyQuery<U> {
+	dropWhile(predicate: Predicate<T>): ILazyQuery<T> {
 		return new LazyQueryDropWhile(this, predicate);
 	}
 
-	first(): U | undefined {
+	first(): T | undefined {
 		return this[Symbol.iterator]().next().value;
 	}
 
-	last(): U | undefined {
+	last(): T | undefined {
 		const iterator = this[Symbol.iterator]();
 		let prev;
 		let value = iterator.next();
@@ -101,7 +104,7 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return prev;
 	}
 
-	any(predicate: Predicate<U>): boolean {
+	any(predicate: Predicate<T>): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -113,7 +116,7 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return false;
 	}
 
-	all(predicate: Predicate<U>): boolean {
+	all(predicate: Predicate<T>): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -125,7 +128,7 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return true;
 	}
 
-	reverse(): ILazyQuery<U> {
+	reverse(): ILazyQuery<T> {
 		const reverse = this.toArray();
 		if (reverse.length > 0) {
 			for (let i = 0, j = Math.floor(reverse.length / 2); i < j; i++) {
@@ -138,20 +141,20 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return new LazyQuery(reverse);
 	}
 
-	intersperse<V>(element: V): ILazyQuery<U | V> {
+	intersperse<U>(element: U): ILazyQuery<T | U> {
 		return new LazyQueryIntersperce(this, element);
 	}
 
-	reduce(func: Accumulator<U, U>): U | undefined;
-	reduce<V>(func: Accumulator<U, V>, initial: V): V;
-	reduce<V>(func: Accumulator<U, V>, initial?: V): V | undefined {
+	reduce(func: Accumulator<T, T>): T | undefined;
+	reduce<U>(func: Accumulator<T, U>, initial: U): U;
+	reduce<U>(func: Accumulator<T, U>, initial?: U): U | undefined {
 		const iterator = this[Symbol.iterator]();
 		if (arguments.length < 2) {
 			let value = iterator.next();
 			if (value.done) {
 				return undefined;
 			}
-			let result = value.value as any as V;
+			let result = value.value as any as U;
 			value = iterator.next();
 			while (!value.done) {
 				result = func(result, value.value);
@@ -159,7 +162,7 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 			}
 			return result;
 		}
-		let result = initial as V;
+		let result = initial as U;
 		let value = iterator.next();
 		if (value.done) {
 			return result;
@@ -171,15 +174,15 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return result;
 	}
 
-	unique(equals?: Equals<U>): ILazyQuery<U> {
+	unique(equals?: Equals<T>): ILazyQuery<T> {
 		return new LazyQueryUnique(this, equals);
 	}
 
-	subsequences(): ILazyQuery<U[]> {
+	subsequences(): ILazyQuery<T[]> {
 		return new LazyQuerySubsequences(this);
 	}
 
-	permutations(): ILazyQuery<U[]> {
+	permutations(): ILazyQuery<T[]> {
 		return new LazyQueryPermutations(this);
 	}
 
@@ -209,7 +212,7 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return result;
 	}
 
-	exec(func: Executor<U>): void {
+	exec(func: Executor<T>) {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -218,32 +221,32 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		}
 	}
 
-	sort(comparator: Comparator<U>): ILazyQuery<U> {
+	sort(comparator: Comparator<T>): ILazyQuery<T> {
 		if (!comparator) {
 			throw "Comparator undefined";
 		}
 		// dual-pivot-quick-sort
-		const array = this.toArray();
+		const array: T[] = this.toArray();
 		return new LazyQuery(quicksort(array, 0, array.length - 1, 3, comparator));
 	}
 
-	memoize(): ILazyQuery<U> {
+	memoize(): ILazyQuery<T> {
 		return new LazyQueryMemoize(this);
 	}
 
-	onlyMemoized(): ILazyQuery<U> {
+	onlyMemoized(): ILazyQuery<T> {
 		return new LazyQueryOnlyMemoized(this);
 	}
 
-	concat<V>(this: ILazyQuery<Iterable<V>>): ILazyQuery<V> {
+	concat<U>(this: ILazyQuery<Iterable<U>>): ILazyQuery<U> {
 		return new LazyQueryConcat(this);
 	}
 
-	cycle(): ILazyQuery<U> {
+	cycle(): ILazyQuery<T> {
 		return new LazyQueryCycle(this);
 	}
 
-	get(index: number): U | undefined {
+	get(index: number): T | undefined {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		let j = 0;
@@ -256,7 +259,7 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return undefined;
 	}
 
-	transpose<V>(this: ILazyQuery<Iterable<V>>): ILazyQuery<Iterable<V>> {
+	transpose<U>(this: ILazyQuery<Iterable<U>>): ILazyQuery<Iterable<U>> {
 		return new LazyQueryTranspose(this);
 	}
 
@@ -332,19 +335,19 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return i;
 	}
 
-	iterate(func: (value: U) => U): ILazyQuery<U> {
+	iterate(func: (value: T) => T): ILazyQuery<T> {
 		return new LazyQueryIterate(this, func);
 	}
 
-	append<V>(iterable: Iterable<V>): ILazyQuery<U | V> {
+	append<U>(iterable: Iterable<U>): ILazyQuery<T | U> {
 		return new LazyQueryAppend(this, iterable);
 	}
 
-	prepend<V>(iterable: Iterable<V>): ILazyQuery<U | V> {
+	prepend<U>(iterable: Iterable<U>): ILazyQuery<T | U> {
 		return new LazyQueryPrepend(this, iterable);
 	}
 
-	find(predicate: Predicate<U>): U | undefined {
+	find(predicate: Predicate<T>): T | undefined {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -356,7 +359,7 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return undefined;
 	}
 
-	average(transform?: Transform<U, number>): number {
+	average(transform?: Transform<T, number>): number {
 		let total = 0;
 		let count = 0;
 		const iterator = this[Symbol.iterator]();
@@ -377,7 +380,7 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return count > 0 ? total / count : 0;
 	}
 
-	contains(element: U): boolean {
+	contains(element: T): boolean {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
