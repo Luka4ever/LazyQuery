@@ -259,16 +259,7 @@ export interface ILazyQuery<T> extends IterableMemoizable<T> {
 	 * @param {U} initial The value to give the supplied accumulator function as the current value for the first element
 	 * @return {U} The result of the given function or undefined if the collection is empty
 	 */
-	reduce<U>(func: Accumulator<T, U>, initial: U): U | undefined;
-
-	/**
-	 * Reduces the collection to one value by applying an accumulator function on each value in the collection
-	 *
-	 * @param {Accumulator<T, T>} func The accumulator function
-	 * @returns {(T | undefined)} The result of the given function or undefined if the collection is empty
-	 * @memberof ILazyQuery
-	 */
-	reduce(func: Accumulator<T, T>): T | undefined;
+	reduce<U>(func: Accumulator<T, U>, initial: U): U;
 
 	/**
 	 * Reverses the collection
