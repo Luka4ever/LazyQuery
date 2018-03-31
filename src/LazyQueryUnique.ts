@@ -1,6 +1,7 @@
 import { ILazyQuery } from './ILazyQuery';
 import { LazyQuery } from './LazyQuery';
 import { LazyQueryAppend } from './LazyQueryAppend';
+import { LazyQueryConcat } from './LazyQueryConcat';
 import { LazyQueryCycle } from './LazyQueryCycle';
 import { LazyQueryDrop } from './LazyQueryDrop';
 import { LazyQueryDropWhile } from './LazyQueryDropWhile';
@@ -16,7 +17,6 @@ import { LazyQuerySubsequences } from './LazyQuerySubsequences';
 import { LazyQueryTake } from './LazyQueryTake';
 import { LazyQueryTakeWhile } from './LazyQueryTakeWhile';
 import { LazyQueryTranspose } from './LazyQueryTranspose';
-import { LazyQueryUnique } from './LazyQueryUnique';
 import { quicksort } from './quicksort';
 import {
 	IterableMemoizable,
@@ -29,20 +29,43 @@ import {
 	Comparator
 } from './Types';
 
-export class LazyQueryConcat<T> implements ILazyQuery<T> {
-	constructor(protected source: IterableMemoizable<Iterable<T>>) {}
+export class LazyQueryUnique<T> implements ILazyQuery<T> {
+	constructor(protected source: IterableMemoizable<T>, protected equals?: Equals<T>) {}
 
 	*[Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
-		const collectionsIterator = this.source[Symbol.iterator](onlyMemoized);
-		let collection = collectionsIterator.next();
-		while (!collection.done) {
-			const iterator = collection.value[Symbol.iterator]();
-			let value = iterator.next();
+		const iterator = this.source[Symbol.iterator](onlyMemoized);
+		let value = iterator.next();
+		let values = [];
+		if (typeof this.equals === 'function') {
 			while (!value.done) {
-				yield value.value;
+				let unique = true;
+				for (let i = 0; i < values.length; i++) {
+					if (this.equals(values[i], value.value)) {
+						unique = false;
+						break;
+					}
+				}
+				if (unique) {
+					yield value.value;
+					values.push(value.value);
+				}
 				value = iterator.next();
 			}
-			collection = collectionsIterator.next();
+		} else {
+			while (!value.done) {
+				let unique = true;
+				for (let i = 0; i < values.length; i++) {
+					if (values[i] === value.value) {
+						unique = false;
+						break;
+					}
+				}
+				if (unique) {
+					yield value.value;
+					values.push(value.value);
+				}
+				value = iterator.next();
+			}
 		}
 	}
 
@@ -157,7 +180,7 @@ export class LazyQueryConcat<T> implements ILazyQuery<T> {
 		return new LazyQueryDropWhile(this, predicate);
 	}
 
-	exec(func: Executor<T>): void {
+	exec(func: Executor<T>) {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -339,7 +362,7 @@ export class LazyQueryConcat<T> implements ILazyQuery<T> {
 			throw 'Comparator undefined';
 		}
 		// dual-pivot-quick-sort
-		const array = this.toArray();
+		const array: T[] = this.toArray();
 		return new LazyQuery(quicksort(array, 0, array.length - 1, 3, comparator));
 	}
 

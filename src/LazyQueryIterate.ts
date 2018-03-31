@@ -1,12 +1,12 @@
 import { ILazyQuery } from './ILazyQuery';
 import { LazyQuery } from './LazyQuery';
 import { LazyQueryAppend } from './LazyQueryAppend';
+import { LazyQueryConcat } from './LazyQueryConcat';
 import { LazyQueryCycle } from './LazyQueryCycle';
 import { LazyQueryDrop } from './LazyQueryDrop';
 import { LazyQueryDropWhile } from './LazyQueryDropWhile';
 import { LazyQueryFiltered } from './LazyQueryFiltered';
 import { LazyQueryIntersperce } from './LazyQueryIntersperce';
-import { LazyQueryIterate } from './LazyQueryIterate';
 import { LazyQueryMapped } from './LazyQueryMapped';
 import { LazyQueryMemoize } from './LazyQueryMemoize';
 import { LazyQueryOnlyMemoized } from './LazyQueryOnlyMemoized';
@@ -29,20 +29,21 @@ import {
 	Comparator
 } from './Types';
 
-export class LazyQueryConcat<T> implements ILazyQuery<T> {
-	constructor(protected source: IterableMemoizable<Iterable<T>>) {}
+export class LazyQueryIterate<T> implements ILazyQuery<T> {
+	private iterateFunction: (value: T) => T;
+	constructor(protected source: IterableMemoizable<T>, iterateFunction: (value: T) => T) {
+		this.iterateFunction = iterateFunction;
+	}
 
 	*[Symbol.iterator](onlyMemoized?: boolean): Iterator<T> {
-		const collectionsIterator = this.source[Symbol.iterator](onlyMemoized);
-		let collection = collectionsIterator.next();
-		while (!collection.done) {
-			const iterator = collection.value[Symbol.iterator]();
-			let value = iterator.next();
-			while (!value.done) {
-				yield value.value;
-				value = iterator.next();
+		const iterator: Iterator<T> = this.source[Symbol.iterator](onlyMemoized);
+		let value = iterator.next();
+		while (!value.done) {
+			let permutation = value.value;
+			while (true) {
+				yield permutation;
+				permutation = this.iterateFunction(permutation);
 			}
-			collection = collectionsIterator.next();
 		}
 	}
 
@@ -157,7 +158,7 @@ export class LazyQueryConcat<T> implements ILazyQuery<T> {
 		return new LazyQueryDropWhile(this, predicate);
 	}
 
-	exec(func: Executor<T>): void {
+	exec(func: Executor<T>) {
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		while (!value.done) {
@@ -339,7 +340,7 @@ export class LazyQueryConcat<T> implements ILazyQuery<T> {
 			throw 'Comparator undefined';
 		}
 		// dual-pivot-quick-sort
-		const array = this.toArray();
+		const array: T[] = this.toArray();
 		return new LazyQuery(quicksort(array, 0, array.length - 1, 3, comparator));
 	}
 
