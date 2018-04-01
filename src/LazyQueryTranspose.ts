@@ -396,6 +396,8 @@ export class LazyQueryTranspose<T> implements ILazyQuery<Iterable<T>> {
 		return new LazyQueryTranspose(this);
 	}
 
+	unique(): ILazyQuery<Iterable<T>>;
+	unique(equals: Equals<Iterable<T>>): ILazyQuery<Iterable<T>>;
 	unique(equals?: Equals<Iterable<T>>): ILazyQuery<Iterable<T>> {
 		return new LazyQueryUnique(this, equals);
 	}

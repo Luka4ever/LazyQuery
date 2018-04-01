@@ -324,11 +324,20 @@ export interface ILazyQuery<T> extends IterableMemoizable<T> {
 	/**
 	 * Reduces the collection to not contain any duplicate elements
 	 *
-	 * If equals is specified it is called with the pairs of elements to determine equality
+	 * @param {Equals<T>} [equals]
+	 * @returns {ILazyQuery<T>} A new collection
+	 * @memberof ILazyQuery
+	 */
+	unique(): ILazyQuery<T>;
+
+	/**
+	 * Reduces the collection to not contain any duplicate elements
+	 *
+	 * The 'equals' parameter is called with the pairs of elements to determine equality
 	 *
 	 * @param {Equals<T>} [equals]
 	 * @returns {ILazyQuery<T>} A new collection
 	 * @memberof ILazyQuery
 	 */
-	unique(equals?: Equals<T>): ILazyQuery<T>;
+	unique(equals: Equals<T>): ILazyQuery<T>;
 }

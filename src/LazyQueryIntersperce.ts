@@ -385,6 +385,8 @@ export class LazyQueryIntersperce<T, U> implements ILazyQuery<T | U> {
 		return new LazyQueryTranspose(this);
 	}
 
+	unique(): ILazyQuery<T | U>;
+	unique(equals: Equals<T | U>): ILazyQuery<T | U>;
 	unique(equals?: Equals<T | U>): ILazyQuery<T | U> {
 		return new LazyQueryUnique(this, equals);
 	}

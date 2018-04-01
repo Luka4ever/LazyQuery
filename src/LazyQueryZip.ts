@@ -385,6 +385,8 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 		return new LazyQueryTranspose(this);
 	}
 
+	unique(): ILazyQuery<Tuple<T, U>>;
+	unique(equals: Equals<Tuple<T, U>>): ILazyQuery<Tuple<T, U>>;
 	unique(equals?: Equals<Tuple<T, U>>): ILazyQuery<Tuple<T, U>> {
 		return new LazyQueryUnique(this, equals);
 	}

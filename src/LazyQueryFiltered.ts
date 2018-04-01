@@ -385,6 +385,8 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 		return new LazyQueryTranspose(this);
 	}
 
+	unique(): ILazyQuery<U>;
+	unique(equals: Equals<U>): ILazyQuery<U>;
 	unique(equals?: Equals<U>): ILazyQuery<U> {
 		return new LazyQueryUnique(this, equals);
 	}

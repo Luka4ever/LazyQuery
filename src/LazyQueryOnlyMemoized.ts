@@ -380,6 +380,8 @@ export class LazyQueryOnlyMemoized<T> implements ILazyQuery<T> {
 		return new LazyQueryTranspose(this);
 	}
 
+	unique(): ILazyQuery<T>;
+	unique(equals: Equals<T>): ILazyQuery<T>;
 	unique(equals?: Equals<T>): ILazyQuery<T> {
 		return new LazyQueryUnique(this, equals);
 	}

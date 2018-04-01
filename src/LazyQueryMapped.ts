@@ -383,6 +383,8 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 		return new LazyQueryTranspose(this);
 	}
 
+	unique(): ILazyQuery<U>;
+	unique(equals: Equals<U>): ILazyQuery<U>;
 	unique(equals?: Equals<U>): ILazyQuery<U> {
 		return new LazyQueryUnique(this, equals);
 	}
