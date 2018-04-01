@@ -259,7 +259,7 @@ describe('find', () => {
 			expect(new LazyQuery([1, 2, 3]).find(isOdd)).toEqual(1);
 		});
 		test('should return undefined if no elements in the collection pass the predicate', () => {
-			expect(new LazyQuery([1, 3, 5]).find(isEven)).toBeUndefined()
+			expect(new LazyQuery([1, 3, 5]).find(isEven)).toBeUndefined();
 		});
 	});
 });
@@ -278,7 +278,7 @@ describe('first', () => {
 
 describe('get', () => {
 	describe('(index: number): T | undefined', () => {
-		test('should return the element at the n\'th position in the collection', () => {
+		test("should return the element at the n'th position in the collection", () => {
 			expect(new LazyQuery([1, 2, 3]).get(0)).toEqual(1);
 			expect(new LazyQuery([1, 3, 2]).get(1)).toEqual(3);
 			expect(new LazyQuery([1, 2, 3]).get(1)).toEqual(2);
@@ -332,7 +332,7 @@ describe('iterate', () => {
 			expect(result).toEqual([1, 3, 5, 7, 9]);
 		});
 		test('should return an empty collection if the collection is empty', () => {
-			expect([...new LazyQuery([]).iterate(add(1))]).toEqual([]);
+			expect([...new LazyQuery(<number[]>[]).iterate(add(1))]).toEqual([]);
 		});
 		test('the returned type should be LazyQueryIterate', () => {
 			expect(new LazyQuery([1]).iterate(add(1))).toBeInstanceOf(LazyQueryIterate);
@@ -382,11 +382,14 @@ describe('max', () => {
 describe('memoize', () => {
 	describe('(): ILazyQuery<T>', () => {
 		test('should memoize the collection', () => {
-			const mockIterationNextCallback = jest.fn().mockImplementationOnce(() => {
-				return { value: 1, done: false };
-			}).mockImplementation(() => {
-				return { value: 0, done: true };
-			});
+			const mockIterationNextCallback = jest
+				.fn()
+				.mockImplementationOnce(() => {
+					return { value: 1, done: false };
+				})
+				.mockImplementation(() => {
+					return { value: 0, done: true };
+				});
 			const mockCollection = {
 				[Symbol.iterator]: () => {
 					return {
@@ -422,11 +425,14 @@ describe('min', () => {
 describe('onlyMemoized', () => {
 	describe('(): ILazyQuery<T>', () => {
 		test('should call the source iterator with the parameter true', () => {
-			const mockIterationNextCallback = jest.fn().mockImplementationOnce(() => {
-				return { value: 1, done: false };
-			}).mockImplementation(() => {
-				return { value: 0, done: true };
-			});
+			const mockIterationNextCallback = jest
+				.fn()
+				.mockImplementationOnce(() => {
+					return { value: 1, done: false };
+				})
+				.mockImplementation(() => {
+					return { value: 0, done: true };
+				});
 			const mockIterator = jest.fn(() => {
 				return { next: mockIterationNextCallback };
 			});
@@ -459,7 +465,20 @@ describe('or', () => {
 
 describe('permutations', () => {
 	describe('(): ILazyQuery<T[]>', () => {
-
+		test('should return the set of all possible permutations of the collection', () => {
+			expect([...new LazyQuery([1, 2, 3]).permutations()]).toEqual([
+				[1, 2, 3],
+				[2, 1, 3],
+				[3, 1, 2],
+				[1, 3, 2],
+				[2, 3, 1],
+				[3, 2, 1]
+			]);
+			expect([...new LazyQuery([3, 1]).permutations()]).toEqual([[3, 1], [1, 3]]);
+		});
+		test('an empty collection should return a collection containing an empty collection', () => {
+			expect([...new LazyQuery([]).permutations()]).toEqual([[]]);
+		});
 		test('the returned type should be LazyQueryPermutations', () => {
 			expect(new LazyQuery([]).permutations()).toBeInstanceOf(LazyQueryPermutations);
 		});
@@ -467,53 +486,276 @@ describe('permutations', () => {
 });
 
 describe('prepend', () => {
-	describe('', () => { });
+	describe('<U>(iterable: Iterable<U>): ILazyQuery<T | U>', () => {
+		test('adds a collection to the start of the collection', () => {
+			expect([...new LazyQuery([1, 2]).prepend([0])]).toEqual([0, 1, 2]);
+			expect([...new LazyQuery([1, 2]).prepend([0, 3])]).toEqual([0, 3, 1, 2]);
+			expect([...new LazyQuery([1, 2]).prepend([])]).toEqual([1, 2]);
+			expect([...new LazyQuery([]).prepend([])]).toEqual([]);
+		});
+		test('the returned type should be LazyQueryPrepend', () => {
+			expect(new LazyQuery([]).prepend([])).toBeInstanceOf(LazyQueryPrepend);
+		});
+	});
 });
 
 describe('product', () => {
-	describe('', () => { });
+	describe('(this: ILazyQuery<number>): number', () => {
+		test('should return the product of the collection', () => {
+			expect(new LazyQuery([2, 3]).product()).toEqual(6);
+			expect(new LazyQuery([3, 3]).product()).toEqual(9);
+			expect(new LazyQuery([3, 4]).product()).toEqual(12);
+			expect(new LazyQuery([3, 4, 2]).product()).toEqual(24);
+			expect(new LazyQuery([3, 4, 0]).product()).toEqual(0);
+		});
+	});
 });
 
 describe('reduce', () => {
-	describe('', () => { });
+	describe('(func: Accumulator<T, T>): T | undefined', () => {
+		test('should return the result of applying a given accumualtor function to the running result and each element', () => {
+			expect(new LazyQuery([3]).reduce((a, b) => a + b)).toEqual(3);
+			expect(new LazyQuery([1, 2, 3]).reduce((a, b) => a + b)).toEqual(6);
+			expect(new LazyQuery([1, 3, 3]).reduce((a, b) => a + b)).toEqual(7);
+			expect(new LazyQuery([1, 3, 3]).reduce((a, b) => a * b)).toEqual(9);
+		});
+		test('should return undefined if the collection is empty', () => {
+			expect(new LazyQuery(<number[]>[]).reduce(add(1))).toBeUndefined();
+		});
+	});
+	describe('<U>(func: Accumulator<T, U>, initial: U): U', () => {
+		test('should return the result of applying a given accumualtor function to the running result and each element, with the running result starting off being the value of the initial parameter', () => {
+			expect(new LazyQuery([1, 2, 3]).reduce((a, b) => a + b, 1)).toEqual(7);
+			expect(new LazyQuery([1, 3, 3]).reduce((a, b) => a + b, 1)).toEqual(8);
+			expect(new LazyQuery([1, 3, 3]).reduce((a, b) => a * b, 1)).toEqual(9);
+		});
+	});
 });
 
 describe('reverse', () => {
-	describe('', () => { });
+	describe('(): ILazyQuery<T>', () => {
+		test('reverses the order of the elements in the collection', () => {
+			expect([...new LazyQuery([1, 2, 3]).reverse()]).toEqual([3, 2, 1]);
+			expect([...new LazyQuery([4, 2, 3]).reverse()]).toEqual([3, 2, 4]);
+		});
+		test('should return an empty collection if the collection is empty', () => {
+			expect([...new LazyQuery([]).reverse()]).toEqual([]);
+		});
+		test('the returned type should be LazyQuery', () => {
+			expect(new LazyQuery([]).reverse()).toBeInstanceOf(LazyQuery);
+		});
+	});
 });
 
 describe('sort', () => {
-	describe('', () => { });
+	describe('(comparator: Comparator<T>): ILazyQuery<T>', () => {
+		test('should return an empty collection if the collection is empty', () => {
+			expect([...new LazyQuery([]).sort((a, b) => a - b)]).toEqual([]);
+		});
+		test('should sort the collection based on the given comparator function', () => {
+			expect([...new LazyQuery([5, 1, 2, 1, 4]).sort((a, b) => a - b)]).toEqual([1, 1, 2, 4, 5]);
+			expect([...new LazyQuery([5, 1, 2, 1, 4]).sort((a, b) => b - a)]).toEqual([5, 4, 2, 1, 1]);
+			expect([...new LazyQuery([5, 3, 2, 1, 4]).sort((a, b) => a - b)]).toEqual([1, 2, 3, 4, 5]);
+			expect([...new LazyQuery([5, 3, 2, 1, 4]).sort((a, b) => b - a)]).toEqual([5, 4, 3, 2, 1]);
+		});
+	});
 });
 
 describe('subsequences', () => {
-	describe('', () => { });
+	describe('(): ILazyQuery<T[]>', () => {
+		test('should return a collection containing an empty collection if the collection is empty', () => {
+			expect([...new LazyQuery([]).subsequences()]).toEqual([[]]);
+		});
+		test('should return a collection containing all the subsequences of the collection', () => {
+			expect([...new LazyQuery([1, 2, 3]).subsequences()]).toEqual([
+				[],
+				[1],
+				[2],
+				[1, 2],
+				[3],
+				[1, 3],
+				[2, 3],
+				[1, 2, 3]
+			]);
+			expect([...new LazyQuery([1, 2, 4]).subsequences()]).toEqual([
+				[],
+				[1],
+				[2],
+				[1, 2],
+				[4],
+				[1, 4],
+				[2, 4],
+				[1, 2, 4]
+			]);
+			expect([...new LazyQuery([2, 2, 3, 4]).subsequences()]).toEqual([
+				[],
+				[2],
+				[2],
+				[2, 2],
+				[3],
+				[2, 3],
+				[2, 3],
+				[2, 2, 3],
+				[4],
+				[2, 4],
+				[2, 4],
+				[3, 4],
+				[2, 2, 4],
+				[2, 3, 4],
+				[2, 3, 4],
+				[2, 2, 3, 4]
+			]);
+		});
+		test('the returned type should be LazyQuerySubsequences', () => {
+			expect(new LazyQuery([]).subsequences()).toBeInstanceOf(LazyQuerySubsequences);
+		});
+	});
 });
 
 describe('sum', () => {
-	describe('', () => { });
+	describe('(this: ILazyQuery<number>): number', () => {
+		test('returns the sum of adding all the elements in the collection', () => {
+			expect(new LazyQuery([2]).sum()).toEqual(2);
+			expect(new LazyQuery([1, 2, 3]).sum()).toEqual(6);
+			expect(new LazyQuery([1, 2, 3]).sum()).toEqual(6);
+			expect(new LazyQuery([2, 2, 4]).sum()).toEqual(8);
+			expect(new LazyQuery([2, 2, 4, 5]).sum()).toEqual(13);
+		});
+		test('should return 0 if the collection is empty', () => {
+			expect(new LazyQuery([]).sum()).toEqual(0);
+		});
+	});
 });
 
 describe('take', () => {
-	describe('', () => { });
+	describe('(count: number): ILazyQuery<T>', () => {
+		test('should return a collection containing the first n elements in the collection', () => {
+			expect([...new LazyQuery([1, 2, 3]).take(1)]).toEqual([1]);
+			expect([...new LazyQuery([2, 1, 3]).take(1)]).toEqual([2]);
+			expect([...new LazyQuery([2, 1, 3]).take(2)]).toEqual([2, 1]);
+			expect([...new LazyQuery([1, 2, 3]).take(2)]).toEqual([1, 2]);
+		});
+		test('should return a collection containing all the elements in the collection if n exceeds the length of the collection', () => {
+			expect([...new LazyQuery([1, 2, 3]).take(4)]).toEqual([1, 2, 3]);
+			expect([...new LazyQuery([1, 2, 3]).take(5)]).toEqual([1, 2, 3]);
+			expect([...new LazyQuery([4, 2, 3]).take(4)]).toEqual([4, 2, 3]);
+			expect([...new LazyQuery([4, 2, 3]).take(5)]).toEqual([4, 2, 3]);
+		});
+		test('the returned type should be LazyQueryTake', () => {
+			expect(new LazyQuery([]).take(1)).toBeInstanceOf(LazyQueryTake);
+		});
+	});
 });
 
 describe('takeWhile', () => {
-	describe('', () => { });
+	describe('(predicate: Predicate<T>): ILazyQuery<T>', () => {
+		test('should return a collection containing the first elements in the collection that pass a given predicate', () => {
+			expect([...new LazyQuery([]).takeWhile(isOdd)]).toEqual([]);
+			expect([...new LazyQuery([]).takeWhile(isEven)]).toEqual([]);
+			expect([...new LazyQuery([1]).takeWhile(isOdd)]).toEqual([1]);
+			expect([...new LazyQuery([1]).takeWhile(isEven)]).toEqual([]);
+			expect([...new LazyQuery([1, 2, 3]).takeWhile(isOdd)]).toEqual([1]);
+			expect([...new LazyQuery([2, 1, 3]).takeWhile(isOdd)]).toEqual([]);
+			expect([...new LazyQuery([2, 1, 3]).takeWhile(isOdd)]).toEqual([]);
+			expect([...new LazyQuery([1, 3, 2]).takeWhile(isOdd)]).toEqual([1, 3]);
+			expect([...new LazyQuery([1, 2, 3]).takeWhile(isEven)]).toEqual([]);
+			expect([...new LazyQuery([2, 1, 3]).takeWhile(isEven)]).toEqual([2]);
+			expect([...new LazyQuery([2, 1, 3]).takeWhile(isEven)]).toEqual([2]);
+			expect([...new LazyQuery([4, 2, 3]).takeWhile(isEven)]).toEqual([4, 2]);
+		});
+		test('the returned type should be LazyQueryTakeWhile', () => {
+			expect(new LazyQuery([]).takeWhile(isEven)).toBeInstanceOf(LazyQueryTakeWhile);
+		});
+	});
 });
 
 describe('toArray', () => {
-	describe('', () => { });
+	describe('(): T[]', () => {
+		test('should return an array containing all the elements in the collection', () => {
+			expect(new LazyQuery([]).toArray()).toEqual([]);
+			expect(new LazyQuery([1]).toArray()).toEqual([1]);
+			expect(new LazyQuery([2]).toArray()).toEqual([2]);
+			expect(new LazyQuery([1, 2]).toArray()).toEqual([1, 2]);
+			expect(new LazyQuery([2, 1]).toArray()).toEqual([2, 1]);
+		});
+	});
 });
 
 describe('toString', () => {
-	describe('', () => { });
+	describe('(): string', () => {
+		test('should concatnate the elements in the collection to a string', () => {
+			expect(new LazyQuery(['lorem', 'ipsum']).toString()).toEqual('loremipsum');
+			expect(new LazyQuery([1, 2]).toString()).toEqual('12');
+		});
+	});
 });
 
 describe('transpose', () => {
-	describe('', () => { });
+	describe('<U>(this: ILazyQuery<Iterable<U>>): ILazyQuery<Iterable<U>>', () => {
+		test('should transpose the collection so the first element in each array become elements in the first element and the elements in the first element become the first element in each element', () => {
+			expect([...new LazyQuery([[1, 2, 3], [4, 5, 6], [7, 8, 9]]).transpose()]).toEqual([
+				[1, 4, 7],
+				[2, 5, 8],
+				[3, 6, 9]
+			]);
+			expect([...new LazyQuery([[1, 4, 7], [2, 5, 8], [3, 6, 9]]).transpose()]).toEqual([
+				[1, 2, 3],
+				[4, 5, 6],
+				[7, 8, 9]
+			]);
+		});
+		test('should return an empty collection if the collection is empty', () => {
+			expect([...new LazyQuery([]).transpose()]).toEqual([]);
+		});
+		test('the returned type should be LazyQueryTranspose', () => {
+			expect(new LazyQuery([]).transpose()).toBeInstanceOf(LazyQueryTranspose);
+		});
+	});
 });
 
 describe('unique', () => {
-	describe('', () => { });
+	describe('(): ILazyQuery<T>', () => {
+		test('should return a collection containing only the first instance of each value', () => {
+			expect([...new LazyQuery([1, 2, 1, 3]).unique()]).toEqual([1, 2, 3]);
+			expect([...new LazyQuery([1, 1, 1, 3]).unique()]).toEqual([1, 3]);
+			expect([...new LazyQuery([1, 2, 4, 3]).unique()]).toEqual([1, 2, 4, 3]);
+		});
+		test('should return an empty collection if the collection is empty', () => {
+			expect([...new LazyQuery([]).unique()]).toEqual([]);
+		});
+		test('the returned type should be LazyQueryUnique', () => {
+			expect(new LazyQuery([]).unique()).toBeInstanceOf(LazyQueryUnique);
+		});
+	});
+	describe('(equals: Equals<T>): ILazyQuery<T>', () => {
+		test('should return a collection containing only the first instance of each value', () => {
+			expect([...new LazyQuery([1, 2, 1, 3]).unique((a, b) => a === b)]).toEqual([1, 2, 3]);
+			expect([...new LazyQuery([1, 1, 1, 3]).unique((a, b) => a === b)]).toEqual([1, 3]);
+			expect([...new LazyQuery([1, 2, 4, 3]).unique((a, b) => a === b)]).toEqual([1, 2, 4, 3]);
+			expect([
+				...new LazyQuery([{ value: 1 }, { value: 2 }, { value: 1 }]).unique(
+					(a, b) => a.value === b.value
+				)
+			]).toEqual([{ value: 1 }, { value: 2 }]);
+			expect([
+				...new LazyQuery([{ value: 1 }, { value: 2 }, { value: 3 }]).unique(
+					(a, b) => a.value === b.value
+				)
+			]).toEqual([{ value: 1 }, { value: 2 }, { value: 3 }]);
+			expect([
+				...new LazyQuery([{ value: 1 }, { value: 1 }, { value: 1 }]).unique(
+					(a, b) => a.value === b.value
+				)
+			]).toEqual([{ value: 1 }]);
+		});
+		test('should return an empty collection if the collection is empty', () => {
+			expect([...new LazyQuery([]).unique((a, b) => a === b)]).toEqual([]);
+			expect([
+				...new LazyQuery(<{ value: number }[]>[]).unique((a, b) => a.value === b.value)
+			]).toEqual([]);
+		});
+		test('the returned type should be LazyQueryUnique', () => {
+			expect(new LazyQuery([]).unique((a, b) => a === b)).toBeInstanceOf(LazyQueryUnique);
+		});
+	});
 });
