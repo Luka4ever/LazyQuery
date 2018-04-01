@@ -201,7 +201,7 @@ describe('drop', () => {
 });
 
 describe('dropWhile', () => {
-	describe('', () => {
+	describe('(predicate: Predicate<T>): ILazyQuery<T>', () => {
 		test('should return an empty collection if all the elements of the collection pass the given predicate', () => {
 			expect([...new LazyQuery([1, 3, 5]).dropWhile(isOdd)]).toEqual([]);
 		});
