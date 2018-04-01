@@ -558,6 +558,9 @@ describe('sort', () => {
 			expect([...new LazyQuery([5, 3, 2, 1, 4]).sort((a, b) => a - b)]).toEqual([1, 2, 3, 4, 5]);
 			expect([...new LazyQuery([5, 3, 2, 1, 4]).sort((a, b) => b - a)]).toEqual([5, 4, 3, 2, 1]);
 		});
+		test('the returned type should be LazyQuery', () => {
+			expect(new LazyQuery([]).sort((a, b) => b - a)).toBeInstanceOf(LazyQuery);
+		});
 	});
 });
 
