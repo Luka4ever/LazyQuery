@@ -529,6 +529,9 @@ describe('reduce', () => {
 			expect(new LazyQuery([1, 3, 3]).reduce((a, b) => a + b, 1)).toEqual(8);
 			expect(new LazyQuery([1, 3, 3]).reduce((a, b) => a * b, 1)).toEqual(9);
 		});
+		test('should return the initial value if the collection is empty', () => {
+			expect(new LazyQuery([]).reduce(add(1), 2)).toEqual(2);
+		});
 	});
 });
 
