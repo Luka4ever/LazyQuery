@@ -197,6 +197,9 @@ export class LazyQueryMemoize<T> implements ILazyQuery<T> {
 	}
 
 	get(index: number): T | undefined {
+		if (index < 0) {
+			return undefined;
+		}
 		if (this.data.length > index) {
 			return this.data[index];
 		}

@@ -189,6 +189,9 @@ export class LazyQueryPrepend<T, U> implements ILazyQuery<T | U> {
 	}
 
 	get(index: number): T | U | undefined {
+		if (index < 0) {
+			return undefined;
+		}
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		let j = 0;

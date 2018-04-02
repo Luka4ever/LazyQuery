@@ -188,6 +188,9 @@ export class LazyQueryFiltered<T, U extends T> implements ILazyQuery<U> {
 	}
 
 	get(index: number): U | undefined {
+		if (index < 0) {
+			return undefined;
+		}
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		let j = 0;

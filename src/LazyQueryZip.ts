@@ -188,6 +188,9 @@ export class LazyQueryZip<T, U> implements ILazyQuery<Tuple<T, U>> {
 	}
 
 	get(index: number): Tuple<T, U> | undefined {
+		if (index < 0) {
+			return undefined;
+		}
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		let j = 0;

@@ -199,6 +199,9 @@ export class LazyQueryTranspose<T> implements ILazyQuery<Iterable<T>> {
 	}
 
 	get(index: number): Iterable<T> | undefined {
+		if (index < 0) {
+			return undefined;
+		}
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		let j = 0;

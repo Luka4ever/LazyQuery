@@ -186,6 +186,9 @@ export class LazyQueryMapped<T, U> implements ILazyQuery<U> {
 	}
 
 	get(index: number): U | undefined {
+		if (index < 0) {
+			return undefined;
+		}
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		let j = 0;

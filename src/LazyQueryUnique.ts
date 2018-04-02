@@ -211,6 +211,9 @@ export class LazyQueryUnique<T> implements ILazyQuery<T> {
 	}
 
 	get(index: number): T | undefined {
+		if (index < 0) {
+			return undefined;
+		}
 		const iterator = this[Symbol.iterator]();
 		let value = iterator.next();
 		let j = 0;
